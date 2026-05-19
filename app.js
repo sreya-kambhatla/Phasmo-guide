@@ -276,6 +276,8 @@ function initApp() {
   buildSanityCards();
   buildGhostCards();
   renderHuntResults();
+  // Measure flip card heights after fonts load (slight delay for font render)
+  setTimeout(initTestCardHeights, 300);
 }
 
 
@@ -550,11 +552,42 @@ function buildTestCards(filter = '') {
 function flipTestCard(index) {
   const card = document.getElementById(`tc-flip-${index}`);
   if (!card) return;
+
+  const wrap      = card.parentElement;
+  const isFlipped = card.classList.contains('flipped');
+  const front     = card.querySelector('.test-front');
+  const back      = card.querySelector('.test-back');
+
   card.classList.toggle('flipped');
+
+  // Measure the face that is about to become visible
+  // We briefly make it visible (off-screen via opacity) to measure it,
+  // then set the wrapper height so no content overlaps below
+  const targetFace = isFlipped ? front : back;
+
+  // Use requestAnimationFrame so the DOM has updated before measuring
+  requestAnimationFrame(() => {
+    const h = targetFace.getBoundingClientRect().height;
+    // Add 1px buffer to prevent sub-pixel clipping
+    wrap.style.height = (h + 1) + 'px';
+  });
+}
+
+// Set initial heights for all cards once DOM is ready
+function initTestCardHeights() {
+  document.querySelectorAll('.test-card-wrap').forEach(wrap => {
+    const front = wrap.querySelector('.test-front');
+    if (front) {
+      const h = front.getBoundingClientRect().height;
+      if (h > 0) wrap.style.height = (h + 1) + 'px';
+    }
+  });
 }
 
 function filterTests(value) {
   buildTestCards(value);
+  // Re-measure heights after search results change
+  requestAnimationFrame(initTestCardHeights);
 }
 
 
