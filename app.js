@@ -233,8 +233,28 @@ function enterApp() {
   setTimeout(() => {
     document.getElementById('splash').style.display = 'none';
     document.getElementById('app').classList.add('visible');
+    cleanupSplash();
     initApp();
   }, 2900);
+}
+
+// ── SPLASH CLEANUP ───────────────────────────────────────────
+// Once the app shell is shown, every splash element gets removed
+// from the render tree entirely. This prevents:
+//   - position:fixed fog/sky/ground divs covering app content
+//   - Bottom strip blacked out by #ground gradient
+//   - Corner ornaments floating over app UI
+//   - Ongoing CSS animations consuming GPU for no reason
+function cleanupSplash() {
+  const splashIds = ['sky', 'stars', 'bolt', 'house-wrap', 'ground', 'veil'];
+  splashIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  // Fog layers — selected by class since there are 3 of them
+  document.querySelectorAll('.fog').forEach(el => el.style.display = 'none');
+  // Corner ornaments
+  document.querySelectorAll('.corner').forEach(el => el.style.display = 'none');
 }
 
 
