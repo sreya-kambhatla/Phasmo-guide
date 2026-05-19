@@ -296,19 +296,38 @@ const TAB_HEADER_LABELS = {
   ghosts: 'Ghosts — All 29',
 };
 
+// Tab order — used to determine slide direction
+const TAB_ORDER = ['hunt', 'smudge', 'tests', 'sanity', 'ghosts'];
+let currentTabIndex = 0;
+
 function switchTab(tab) {
+  const newIndex = TAB_ORDER.indexOf(tab);
+  const dir      = newIndex > currentTabIndex ? 'forward'
+                 : newIndex < currentTabIndex ? 'back'
+                 : 'none';
+  currentTabIndex = newIndex;
+
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('view-' + tab).classList.add('active');
+
+  const view = document.getElementById('view-' + tab);
+  view.dataset.dir = dir;
+  view.classList.add('active');
+
   document.getElementById('ni-' + tab).classList.add('active');
   document.getElementById('currentTabLabel').textContent = TAB_HEADER_LABELS[tab];
   document.getElementById('app-content').scrollTop = 0;
 
-  // Measure test card heights the first time Tests tab becomes visible.
-  // Cannot measure while hidden — getBoundingClientRect returns 0 for
-  // elements with display:none, so we must wait until the tab is shown.
+  // Show/hide suspect count badge
+  const badge = document.getElementById('suspectCount');
+  if (tab === 'hunt') {
+    updateSuspectCount();
+  } else {
+    badge.classList.remove('visible');
+  }
+
+  // Measure test card heights when Tests tab becomes visible
   if (tab === 'tests') {
-    // One rAF to let the view render, then measure
     requestAnimationFrame(() => requestAnimationFrame(initTestCardHeights));
   }
 }
@@ -336,15 +355,37 @@ function toggleFilter(btn, event) {
 
 function resetFilters() {
   activeFilters.clear();
+  filtersCollapsed = false;
+  expandFilters();
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('sel'));
   renderHuntResults();
 }
 
+// Filter label map for collapsed chip display
+const FILTER_LABELS = {
+  slow:'Very slow', normal:'Normal', fast:'Fast', changes:'Speed changes',
+  ignores:'Walks past', losfast:'Speeds up', slownear:'Slows near', elec:'Electronics',
+  silent:'Silent steps', heartbeat:'Heartbeat', invisible:'Hard to see', visible:'Visible',
+};
+
+let filtersCollapsed = false;
+
 function renderHuntResults() {
-  const el = document.getElementById('huntResults');
+  const el      = document.getElementById('huntResults');
+  const badge   = document.getElementById('suspectCount');
+  const chips   = document.getElementById('filterChipsRow');
+  const expand  = document.getElementById('expandFiltersBtn');
+  const sections= document.getElementById('filterSections');
 
   if (activeFilters.size === 0) {
-    el.innerHTML = '<p class="results-empty">// tap filters to narrow down ghosts</p>';
+    // Nothing selected — show full filters, hide collapse UI
+    el.innerHTML = '<p class="results-empty">// start with speed observed above</p>';
+    chips.classList.remove('visible');
+    expand.classList.remove('visible');
+    if (sections) sections.classList.remove('collapsed');
+    filtersCollapsed = false;
+    badge.classList.remove('visible');
+    updateSuspectCount();
     return;
   }
 
@@ -352,27 +393,97 @@ function renderHuntResults() {
     [...activeFilters].every(f => ghost.tags.includes(f))
   );
 
+  // Update live count badge in header
+  updateSuspectCount(matches.length);
+
   if (matches.length === 0) {
     el.innerHTML = '<p class="results-empty">// no matches — try fewer filters</p>';
+  } else {
+    // Cards stagger in via CSS nth-child animation delays
+    el.innerHTML = matches.map(ghost => `
+      <div class="result-card card-${ghost.action}">
+        <div class="rc-name">${ghost.name}</div>
+        <div class="rc-speed">${ghost.speed} m/s</div>
+        <span class="rc-action ${ACTION_CLASS[ghost.action]}">${ghost.actionTxt}</span>
+        <div class="rc-tell">${ghost.tell}</div>
+      </div>
+    `).join('');
+
+    // Auto-collapse filters when results appear — gives more space to results
+    if (!filtersCollapsed && matches.length > 0) {
+      collapseFilters();
+    }
+
+    // Scroll to results when ≤2 matches
+    if (matches.length <= 2) {
+      setTimeout(() => {
+        el.scrollIntoView({ behavior:'smooth', block:'nearest' });
+      }, 100);
+    }
+  }
+}
+
+function collapseFilters() {
+  const sections = document.getElementById('filterSections');
+  const chips    = document.getElementById('filterChipsRow');
+  const expand   = document.getElementById('expandFiltersBtn');
+  if (!sections) return;
+
+  sections.classList.add('collapsed');
+  chips.classList.add('visible');
+  expand.classList.add('visible');
+  filtersCollapsed = true;
+
+  // Render active filter chips
+  chips.innerHTML = [...activeFilters].map(f => `
+    <div class="chip-active" onclick="removeFilter('${f}')">
+      ${FILTER_LABELS[f] || f}
+      <span class="chip-x">&times;</span>
+    </div>
+  `).join('');
+}
+
+function expandFilters() {
+  const sections = document.getElementById('filterSections');
+  const chips    = document.getElementById('filterChipsRow');
+  const expand   = document.getElementById('expandFiltersBtn');
+  if (!sections) return;
+  sections.classList.remove('collapsed');
+  chips.classList.remove('visible');
+  expand.classList.remove('visible');
+  filtersCollapsed = false;
+}
+
+function removeFilter(f) {
+  // Remove a single filter from the chip row
+  activeFilters.delete(f);
+  const btn = document.querySelector(`.filter-btn[data-f="${f}"]`);
+  if (btn) btn.classList.remove('sel');
+  filtersCollapsed = false; // allow re-collapse on next render
+  renderHuntResults();
+}
+
+function updateSuspectCount(count) {
+  const badge = document.getElementById('suspectCount');
+  if (!badge) return;
+  // Only show on Hunt tab
+  const huntActive = document.getElementById('view-hunt').classList.contains('active');
+  if (!huntActive) { badge.classList.remove('visible'); return; }
+
+  if (activeFilters.size === 0) {
+    badge.classList.remove('visible');
     return;
   }
 
-  // Cards stagger in via CSS nth-child animation delays
-  el.innerHTML = matches.map(ghost => `
-    <div class="result-card card-${ghost.action}">
-      <div class="rc-name">${ghost.name}</div>
-      <div class="rc-speed">${ghost.speed} m/s</div>
-      <span class="rc-action ${ACTION_CLASS[ghost.action]}">${ghost.actionTxt}</span>
-      <div class="rc-tell">${ghost.tell}</div>
-    </div>
-  `).join('');
+  const n = count !== undefined ? count
+    : GHOSTS.filter(g => [...activeFilters].every(f => g.tags.includes(f))).length;
 
-  // Scroll results into view when ≤2 matches — FIX for single result visibility
-  if (matches.length <= 2) {
-    setTimeout(() => {
-      el.scrollIntoView({ behavior:'smooth', block:'nearest' });
-    }, 100);
-  }
+  badge.textContent = n + (n === 1 ? ' suspect' : ' suspects');
+  badge.classList.add('visible');
+  // Pulse animation on change
+  badge.classList.remove('updated');
+  void badge.offsetWidth; // force reflow to restart animation
+  badge.classList.add('updated');
 }
 
 
@@ -643,6 +754,15 @@ function updateSanitySlider(value) {
   const val     = parseInt(value);
   const display = document.getElementById('sanityValDisplay');
   const summary = document.getElementById('sanitySummary');
+  const barFill = document.getElementById('sanityBarFill');
+
+  // Health bar — colour shifts: green (safe) → gold (caution) → red (danger)
+  if (barFill) {
+    barFill.style.width = val + '%';
+    barFill.style.background = val <= 30 ? '#c04040'
+                             : val <= 55 ? '#c07820'
+                             : '#4ec47a';
+  }
 
   // Colour the big number
   display.textContent = val + '%';
@@ -744,7 +864,218 @@ function filterGhosts(value) { buildGhostCards(value); }
 
 
 /* ══════════════════════════════════════════════════════════
-   13. RIPPLE HELPER
+   13. SPEED CALCULATOR
+   
+   HOW IT WORKS:
+   The player taps in rhythm with ghost footsteps they hear.
+   We record the timestamp of each tap, calculate the average
+   interval between taps, then convert that interval to m/s.
+
+   THE SCIENCE:
+   Ghost footstep cadence is directly proportional to movement speed.
+   A ghost moving at 1.7 m/s takes ~0.45s between steps.
+   Faster ghosts step more frequently. The relationship is roughly:
+     speed (m/s) ≈ 0.76 / interval (seconds between steps)
+   This constant (0.76) is derived from community testing of known
+   ghost speeds against their measured footstep rates.
+
+   We discard the first tap (no interval yet) and use taps 2-8.
+   After 3+ taps we show a live result. After 6+ taps it stabilises.
+   ══════════════════════════════════════════════════════════ */
+
+// Ghost speed ranges for matching — min and max m/s per ghost
+// Used to highlight which ghosts match the measured speed
+const SPEED_RANGES = {
+  'Spirit':      { min:1.5, max:1.9 },
+  'Wraith':      { min:1.5, max:1.9 },
+  'Phantom':     { min:1.5, max:1.9 },
+  'Poltergeist': { min:1.5, max:1.9 },
+  'Banshee':     { min:1.5, max:1.9 },
+  'Jinn':        { min:1.5, max:2.6 },  // varies with breaker
+  'Mare':        { min:1.5, max:1.9 },
+  'Revenant':    { min:0.9, max:3.1 },  // very wide range
+  'Shade':       { min:1.5, max:1.9 },
+  'Demon':       { min:1.5, max:1.9 },
+  'Yurei':       { min:1.5, max:1.9 },
+  'Oni':         { min:1.5, max:1.9 },
+  'Yokai':       { min:1.5, max:1.9 },
+  'Hantu':       { min:1.3, max:2.8 },  // varies with temperature
+  'Goryo':       { min:1.5, max:1.9 },
+  'Myling':      { min:1.5, max:1.9 },
+  'Onryo':       { min:1.5, max:1.9 },
+  'The Twins':   { min:1.4, max:2.0 },
+  'Raiju':       { min:1.5, max:2.6 },  // surges near electronics
+  'Obake':       { min:1.5, max:1.9 },
+  'The Mimic':   { min:0.9, max:3.1 },  // copies any ghost
+  'Moroi':       { min:1.4, max:2.3 },
+  'Deogen':      { min:0.3, max:3.1 },  // 0.4 near player, 3.0 far
+  'Thaye':       { min:0.9, max:2.8 },  // slows as it ages
+  'Dayan':       { min:1.1, max:2.3 },
+  'Obambo':      { min:1.4, max:2.0 },
+  'Gallu':       { min:1.3, max:2.0 },
+  'Aswang':      { min:1.5, max:2.6 },
+  'Kormos':      { min:1.5, max:2.6 },  // stops near player
+};
+
+let speedTaps      = [];   // timestamps of each tap
+let speedCalcTimer = null; // auto-reset after inactivity
+
+function speedTap() {
+  const now  = Date.now();
+  const btn  = document.getElementById('speedTapBtn');
+  const label= document.getElementById('speedTapLabel');
+
+  // Clear auto-reset timer — user is still tapping
+  clearTimeout(speedCalcTimer);
+
+  // If last tap was more than 4s ago, treat as a fresh start
+  if (speedTaps.length > 0 && now - speedTaps[speedTaps.length - 1] > 4000) {
+    speedTaps = [];
+    document.getElementById('speedResult').style.display = 'none';
+    document.getElementById('speedMatchList').innerHTML  = '';
+    document.getElementById('speedResetBtn').style.display = 'none';
+  }
+
+  speedTaps.push(now);
+
+  // Visual tap flash
+  btn.classList.remove('tapped');
+  void btn.offsetWidth;
+  btn.classList.add('tapped');
+
+  // Update tap count in button
+  const count = speedTaps.length;
+  label.textContent = count < 2 ? 'Keep tapping...'
+                    : count < 3 ? 'One more...'
+                    : 'Tapping — keep going';
+
+  // Show/update tap counter badge
+  let badge = btn.querySelector('.tap-count-badge');
+  if (!badge) {
+    badge = document.createElement('span');
+    badge.className = 'tap-count-badge';
+    btn.appendChild(badge);
+  }
+  badge.textContent = count + ' taps';
+
+  // Need at least 3 taps (2 intervals) to calculate
+  if (count >= 3) {
+    calculateSpeed();
+  }
+
+  // Auto-reset after 5s of no tapping
+  speedCalcTimer = setTimeout(() => {
+    if (speedTaps.length >= 3) {
+      // Finalise — show reset button
+      document.getElementById('speedResetBtn').style.display = 'block';
+      label.textContent = 'Tap with footsteps';
+      if (badge) badge.remove();
+    } else {
+      resetSpeedCalc();
+    }
+  }, 5000);
+}
+
+function calculateSpeed() {
+  // Calculate intervals between consecutive taps
+  const intervals = [];
+  for (let i = 1; i < speedTaps.length; i++) {
+    intervals.push((speedTaps[i] - speedTaps[i - 1]) / 1000); // in seconds
+  }
+
+  // Use median interval — more robust than mean against outlier taps
+  intervals.sort((a, b) => a - b);
+  const mid      = Math.floor(intervals.length / 2);
+  const median   = intervals.length % 2 === 0
+                 ? (intervals[mid - 1] + intervals[mid]) / 2
+                 : intervals[mid];
+
+  // Convert interval to speed
+  // Calibration constant 0.76 derived from community speed/footstep testing
+  const speed = Math.round((0.76 / median) * 10) / 10;
+
+  // Show result
+  const resultEl = document.getElementById('speedResult');
+  const valEl    = document.getElementById('speedResultVal');
+  const lblEl    = document.getElementById('speedResultLabel');
+
+  resultEl.style.display = 'flex';
+  valEl.textContent = speed.toFixed(1) + ' m/s';
+
+  // Label based on confidence (more taps = more confident)
+  const taps = speedTaps.length;
+  lblEl.textContent = taps >= 6 ? 'estimated speed — high confidence'
+                    : taps >= 4 ? 'estimated speed — tap more to refine'
+                    : 'estimated speed — keep tapping';
+
+  // Match ghosts to this speed
+  matchSpeedToGhosts(speed);
+}
+
+function matchSpeedToGhosts(speed) {
+  // Tolerance ±0.25 m/s to account for tap timing variation
+  const tolerance = 0.25;
+  const matches   = GHOSTS.filter(g => {
+    const range = SPEED_RANGES[g.name];
+    if (!range) return false;
+    return speed >= (range.min - tolerance) && speed <= (range.max + tolerance);
+  });
+
+  const listEl = document.getElementById('speedMatchList');
+
+  if (matches.length === 0) {
+    listEl.innerHTML = `
+      <div class="speed-match-section">
+        <div class="speed-no-match">// no ghosts match this speed — try tapping again</div>
+      </div>`;
+    return;
+  }
+
+  // If filters are active, cross-reference with current filter results
+  const filterActive = activeFilters.size > 0;
+  const filterMatches = filterActive
+    ? matches.filter(g => [...activeFilters].every(f => g.tags.includes(f)))
+    : matches;
+
+  const showList = filterMatches.length > 0 ? filterMatches : matches;
+  const isFiltered = filterMatches.length > 0 && filterActive;
+
+  listEl.innerHTML = `
+    <div class="speed-match-section">
+      <div class="speed-match-label">
+        ${isFiltered
+          ? '// matches your speed + active filters'
+          : '// ghosts matching this speed'}
+      </div>
+      ${showList.map(g => `
+        <div class="speed-match-card card-${g.action}">
+          <div class="smc-name">${g.name}</div>
+          <div class="smc-speed">${g.speed} m/s range</div>
+          <span class="smc-action ${ACTION_CLASS[g.action]}">${g.actionTxt}</span>
+        </div>
+      `).join('')}
+    </div>`;
+}
+
+function resetSpeedCalc() {
+  speedTaps = [];
+  clearTimeout(speedCalcTimer);
+
+  const btn   = document.getElementById('speedTapBtn');
+  const label = document.getElementById('speedTapLabel');
+  const badge = btn.querySelector('.tap-count-badge');
+
+  label.textContent = 'Tap with footsteps';
+  if (badge) badge.remove();
+
+  document.getElementById('speedResult').style.display   = 'none';
+  document.getElementById('speedMatchList').innerHTML    = '';
+  document.getElementById('speedResetBtn').style.display = 'none';
+}
+
+
+/* ══════════════════════════════════════════════════════════
+   14. RIPPLE HELPER
    Creates a ripple div at the tap point inside a button.
    The ripple div uses the .ripple CSS class which animates
    scale(0) → scale(4) + opacity fade via @keyframes rippleOut.
