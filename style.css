@@ -543,10 +543,12 @@ html, body {
 .test-card-wrap {
   perspective:1000px;
   margin-bottom:10px;
-  min-height:130px;
+  /* Height is set dynamically by JS to match active face */
+  transition:height 0.45s cubic-bezier(0.4,0,0.2,1);
+  overflow:hidden;
 }
 .test-card {
-  position:relative; width:100%; min-height:130px;
+  position:relative; width:100%;
   transform-style:preserve-3d;
   transition:transform 0.45s cubic-bezier(0.4,0,0.2,1);
   cursor:pointer;
@@ -554,7 +556,8 @@ html, body {
 .test-card.flipped { transform:rotateY(180deg); }
 
 .test-face {
-  position:absolute; width:100%; min-height:130px;
+  /* absolute so both faces occupy same space during flip */
+  position:absolute; top:0; left:0; width:100%;
   backface-visibility:hidden; -webkit-backface-visibility:hidden;
   border-radius:var(--card-radius); padding:18px 20px;
   background:var(--bg3);
