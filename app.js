@@ -280,25 +280,26 @@ function initApp() {
 
 
 /* ══════════════════════════════════════════════════════════
-   7. MENU
+   7. NAVIGATION — bottom nav bar
+   switchTab activates the correct view + nav item + header label.
+   No hamburger menu — bottom nav is always visible.
    ══════════════════════════════════════════════════════════ */
-let menuOpen = false;
 
-function toggleMenu() { menuOpen ? closeMenu() : openMenu(); }
-function openMenu()  { menuOpen = true;  document.getElementById('menuOverlay').classList.add('open'); }
-function closeMenu() { menuOpen = false; document.getElementById('menuOverlay').classList.remove('open'); }
-function handleOverlayClick(e) {
-  if (e.target === document.getElementById('menuOverlay')) closeMenu();
-}
+const TAB_HEADER_LABELS = {
+  hunt:   'Hunt — Survive Right Now',
+  smudge: 'Smudge Timer',
+  tests:  'Ghost Tests',
+  sanity: 'Sanity',
+  ghosts: 'Ghosts — All 29',
+};
 
 function switchTab(tab) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('view-' + tab).classList.add('active');
-  document.getElementById('mi-' + tab).classList.add('active');
-  document.getElementById('currentTabLabel').textContent = TAB_LABELS[tab];
+  document.getElementById('ni-' + tab).classList.add('active');
+  document.getElementById('currentTabLabel').textContent = TAB_HEADER_LABELS[tab];
   document.getElementById('app-content').scrollTop = 0;
-  closeMenu();
 }
 
 
@@ -671,14 +672,17 @@ function buildGhostCards(filter = '') {
       <div class="gcf-ev">${g.ev}</div>
       <div class="gcf-body">
         <div class="gcf-row">
+          <i class="ti ti-run gcf-icon" aria-hidden="true"></i>
           <span class="gcf-lbl">Speed</span>
           <span class="gcf-val">${g.speed} m/s</span>
         </div>
         <div class="gcf-row">
+          <i class="ti ti-shield gcf-icon" aria-hidden="true"></i>
           <span class="gcf-lbl">Action</span>
           <span class="gcf-val">${g.actionTxt}</span>
         </div>
         <div class="gcf-row">
+          <i class="ti ti-bulb gcf-icon" aria-hidden="true"></i>
           <span class="gcf-lbl">Tell</span>
           <span class="gcf-val">${g.tell}</span>
         </div>
