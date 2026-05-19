@@ -242,10 +242,10 @@ function enterApp() {
    6. APP INIT
    ══════════════════════════════════════════════════════════ */
 function initApp() {
-  buildEvGrid();
+  buildTestCards();
+  buildSanityCards();
   buildGhostCards();
-  buildQuickRef();
-  renderHuntResults(); // renders empty state
+  renderHuntResults();
 }
 
 
@@ -467,63 +467,169 @@ function resetCooldown() {
 
 
 /* ══════════════════════════════════════════════════════════
-   10. EVIDENCE TAB
+   10. GHOST TESTS TAB
+   Flip cards: front = test instruction, back = full details.
+   Search bar filters list live as you type.
    ══════════════════════════════════════════════════════════ */
-let evState = {};
+function buildTestCards(filter = '') {
+  const fl   = filter.toLowerCase();
+  const list = GHOST_TESTS.filter(t => !fl || t.name.toLowerCase().includes(fl));
 
-function buildEvGrid() {
-  EVIDENCE.forEach(e => evState[e.key] = 0);
-  document.getElementById('evGrid').innerHTML = EVIDENCE.map(e => `
-    <div class="ev-btn" id="eb-${e.key}" onclick="cycleEv('${e.key}', this)">
-      <i class="ti ${e.icon}"></i>${e.label}
+  const diffLabel = { safe:'Safe test', risky:'Risky', hunt:'Requires a hunt' };
+  const diffClass = { safe:'diff-safe',  risky:'diff-risky', hunt:'diff-hunt'  };
+
+  document.getElementById('testCards').innerHTML = list.map((t, i) => `
+    <div class="test-card-wrap">
+      <div class="test-card" id="tc-flip-${i}" onclick="flipTestCard(${i})">
+
+        <!-- FRONT: ghost name + test instruction -->
+        <div class="test-face test-front">
+          <div class="test-front-name">${t.name}</div>
+          <span class="test-diff ${diffClass[t.difficulty]}">${diffLabel[t.difficulty]}</span>
+          <div class="test-front-test">${t.test}</div>
+          <div class="test-flip-hint">Tap to see results &amp; details &#8594;</div>
+        </div>
+
+        <!-- BACK: positive, negative, detail, warning -->
+        <div class="test-face test-back">
+          <div class="test-back-row">
+            <span class="test-back-lbl">&#10003; Confirms</span>
+            <span class="test-back-val test-positive">${t.positive}</span>
+          </div>
+          <div class="test-back-row">
+            <span class="test-back-lbl">&#10007; Rules out</span>
+            <span class="test-back-val test-negative">${t.negative}</span>
+          </div>
+          <div class="test-back-row">
+            <span class="test-back-lbl">Detail</span>
+            <span class="test-back-val">${t.detail}</span>
+          </div>
+          ${t.warning ? `<div class="test-warning">&#9888; ${t.warning}</div>` : ''}
+          <div class="test-flip-back">&#8592; Tap to flip back</div>
+        </div>
+
+      </div>
     </div>
   `).join('');
+
+  // Store count for flip tracking
+  document._testCount = list.length;
 }
 
-function cycleEv(key, btn) {
-  evState[key] = (evState[key] + 1) % 3;
-  btn.className = 'ev-btn' +
-    (evState[key] === 1 ? ' found' : evState[key] === 2 ? ' ruled' : '');
-
-  // Ring pulse on state change
-  btn.classList.add('ev-pulse');
-  setTimeout(() => btn.classList.remove('ev-pulse'), 400);
-
-  renderEvGhosts();
+function flipTestCard(index) {
+  const card = document.getElementById(`tc-flip-${index}`);
+  if (!card) return;
+  card.classList.toggle('flipped');
 }
 
-function renderEvGhosts() {
-  const found = Object.entries(evState).filter(([,v]) => v === 1).map(([k]) => k);
-  const ruled = Object.entries(evState).filter(([,v]) => v === 2).map(([k]) => k);
-  const list  = document.getElementById('evGhostList');
-
-  if (!found.length && !ruled.length) { list.innerHTML = ''; return; }
-
-  const remaining = GHOSTS.filter(g => {
-    const gev = EV_MAP[g.name] || [];
-    return !found.some(e => !gev.includes(e)) && !ruled.some(e => gev.includes(e));
-  }).length;
-
-  list.innerHTML = `<div class="ev-count">// ${remaining} ghost${remaining !== 1 ? 's' : ''} remaining</div>` +
-    GHOSTS.map(g => {
-      const gev  = EV_MAP[g.name] || [];
-      const elim = found.some(e => !gev.includes(e)) || ruled.some(e => gev.includes(e));
-      return `
-        <div class="ghost-row${elim ? ' eliminated' : ''}">
-          <div>
-            <div class="gr-name">${g.name}</div>
-            <div class="gr-ev">${gev.join(' · ')}</div>
-          </div>
-        </div>`;
-    }).join('');
+function filterTests(value) {
+  buildTestCards(value);
 }
 
 
 /* ══════════════════════════════════════════════════════════
-   11. GHOST CARDS TAB
+   11. SANITY TAB
+   Slider → real-time three-state colour coding per ghost.
+   States:
+     safe   (grey/dim)   — ghost cannot hunt at current sanity
+     warn   (gold)       — ghost can hunt at current sanity
+     danger (red)        — ghost has been able to hunt for a while
+                           i.e. threshold is 15+ points above current
+   ══════════════════════════════════════════════════════════ */
+function buildSanityCards() {
+  document.getElementById('sanityCards').innerHTML = SANITY_GHOSTS.map((g, i) => `
+    <div class="sanity-card state-safe" id="sc-${i}" onclick="toggleSanityCard(${i})">
+      <div class="sc-header">
+        <div class="sc-name">${g.name}</div>
+        <div class="sc-threshold th-safe" id="sc-th-${i}">${g.threshold}%</div>
+      </div>
+      <div class="sc-special">${g.special}</div>
+      <div class="sc-body" id="sc-body-${i}">
+        ${g.drains ? `<div class="sc-drain">&#9888; Sanity drainer: ${g.drainNote}</div>` : ''}
+        <div class="gcf-row" style="margin-top:${g.drains ? '6px' : '0'}">
+          <span class="gcf-lbl">Threshold</span>
+          <span class="gcf-val">${g.threshold}% — ${g.special}</span>
+        </div>
+        <div class="gcf-row">
+          <span class="gcf-lbl">Danger</span>
+          <span class="gcf-val">${g.danger.charAt(0).toUpperCase() + g.danger.slice(1)} threat level</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  // Initial state at 100% sanity (all safe)
+  updateSanitySlider(100);
+}
+
+function toggleSanityCard(index) {
+  const body = document.getElementById(`sc-body-${index}`);
+  if (body) body.classList.toggle('open');
+}
+
+function updateSanitySlider(value) {
+  const val     = parseInt(value);
+  const display = document.getElementById('sanityValDisplay');
+  const summary = document.getElementById('sanitySummary');
+
+  // Colour the big number
+  display.textContent = val + '%';
+  display.className = val <= 25 ? 'danger' : val <= 50 ? 'warning' : '';
+
+  // Update each ghost card state
+  let dangerCount = 0;
+  let warnCount   = 0;
+  let safeCount   = 0;
+
+  SANITY_GHOSTS.forEach((g, i) => {
+    const card   = document.getElementById(`sc-${i}`);
+    const thresh = document.getElementById(`sc-th-${i}`);
+    if (!card || !thresh) return;
+
+    // Determine state
+    // safe   = ghost cannot hunt (threshold < current sanity)
+    // warn   = ghost can hunt (threshold >= current sanity)
+    // danger = ghost has been able to hunt for a long time
+    //          defined as: threshold >= current sanity + 15
+    let state, thClass;
+    if (g.threshold < val) {
+      state   = 'state-safe';
+      thClass = 'th-safe';
+      safeCount++;
+    } else if (g.threshold >= val + 15) {
+      state   = 'state-danger';
+      thClass = 'th-danger';
+      dangerCount++;
+    } else {
+      state   = 'state-warn';
+      thClass = 'th-warn';
+      warnCount++;
+    }
+
+    card.className  = `sanity-card ${state}`;
+    thresh.className = `sc-threshold ${thClass}`;
+  });
+
+  // Summary pills
+  let pills = '';
+  if (dangerCount > 0)
+    pills += `<span class="summary-pill pill-danger">&#9888; ${dangerCount} high danger</span>`;
+  if (warnCount > 0)
+    pills += `<span class="summary-pill pill-warn">${warnCount} can hunt now</span>`;
+  if (safeCount > 0)
+    pills += `<span class="summary-pill pill-safe">${safeCount} cannot hunt</span>`;
+  if (!pills)
+    pills = `<span style="font-size:11px;color:rgba(200,178,125,.3);font-family:'Oswald',sans-serif;font-weight:300">Drag slider to see threats</span>`;
+
+  summary.innerHTML = pills;
+}
+
+
+/* ══════════════════════════════════════════════════════════
+   12. GHOST CARDS TAB
    ══════════════════════════════════════════════════════════ */
 function buildGhostCards(filter = '') {
-  const fl = filter.toLowerCase();
+  const fl   = filter.toLowerCase();
   const list = GHOSTS.filter(g => !fl || g.name.toLowerCase().includes(fl));
 
   document.getElementById('ghostCards').innerHTML = list.map(g => `
@@ -552,27 +658,14 @@ function buildGhostCards(filter = '') {
 }
 
 function toggleGhostCard(card) {
-  const body     = card.querySelector('.gcf-body');
-  const chevron  = card.querySelector('.gcf-chevron');
-  const isOpen   = body.classList.contains('open');
+  const body    = card.querySelector('.gcf-body');
+  const chevron = card.querySelector('.gcf-chevron');
+  const isOpen  = body.classList.contains('open');
   body.classList.toggle('open');
   chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
 }
 
 function filterGhosts(value) { buildGhostCards(value); }
-
-
-/* ══════════════════════════════════════════════════════════
-   12. QUICK REF TAB
-   ══════════════════════════════════════════════════════════ */
-function buildQuickRef() {
-  document.getElementById('quickList').innerHTML = GHOSTS.map(g => `
-    <div class="qr-row">
-      <div class="qr-name">${g.name}</div>
-      <div class="qr-tip">${g.tell}</div>
-    </div>
-  `).join('');
-}
 
 
 /* ══════════════════════════════════════════════════════════
