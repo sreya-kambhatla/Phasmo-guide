@@ -276,8 +276,9 @@ function initApp() {
   buildSanityCards();
   buildGhostCards();
   renderHuntResults();
-  // Measure flip card heights after fonts load (slight delay for font render)
-  setTimeout(initTestCardHeights, 300);
+  // Heights are measured when the Tests tab is first opened,
+  // not here — cards are hidden (display:none) so getBoundingClientRect
+  // returns 0 for all of them at this point.
 }
 
 
@@ -302,6 +303,14 @@ function switchTab(tab) {
   document.getElementById('ni-' + tab).classList.add('active');
   document.getElementById('currentTabLabel').textContent = TAB_HEADER_LABELS[tab];
   document.getElementById('app-content').scrollTop = 0;
+
+  // Measure test card heights the first time Tests tab becomes visible.
+  // Cannot measure while hidden — getBoundingClientRect returns 0 for
+  // elements with display:none, so we must wait until the tab is shown.
+  if (tab === 'tests') {
+    // One rAF to let the view render, then measure
+    requestAnimationFrame(() => requestAnimationFrame(initTestCardHeights));
+  }
 }
 
 
@@ -565,12 +574,11 @@ function flipTestCard(index) {
   // then set the wrapper height so no content overlaps below
   const targetFace = isFlipped ? front : back;
 
-  // Use requestAnimationFrame so the DOM has updated before measuring
-  requestAnimationFrame(() => {
-    const h = targetFace.getBoundingClientRect().height;
-    // Add 1px buffer to prevent sub-pixel clipping
-    wrap.style.height = (h + 1) + 'px';
-  });
+  // Measure the target face immediately (position:absolute means it
+  // is always rendered even when hidden behind the other face).
+  // Set the wrapper height right away so it starts animating during the flip.
+  const h = targetFace.getBoundingClientRect().height;
+  if (h > 0) wrap.style.height = (h + 1) + 'px';
 }
 
 // Set initial heights for all cards once DOM is ready
