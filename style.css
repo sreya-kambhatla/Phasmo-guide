@@ -260,7 +260,7 @@ html, body {
   background:linear-gradient(90deg,transparent,rgba(200,160,80,0.7),transparent);
   animation:accentPulse 4s ease-in-out infinite alternate;
 }
-.hdr-left { display:flex; flex-direction:column; gap:3px; position:relative; z-index:1; }
+.hdr-left { display:flex; flex-direction:column; gap:3px; position:relative; z-index:1; flex:1; }
 .app-title-sm {
   font-family:'Special Elite', serif;
   font-size:17px; letter-spacing:0.05em; color:var(--gold);
@@ -270,6 +270,28 @@ html, body {
   font-size:11px; font-weight:300;
   letter-spacing:0.16em; text-transform:uppercase;
   color:var(--text-sub);
+}
+/* Live suspect count badge — shown only on Hunt tab */
+#suspectCount {
+  display:none;
+  font-family:'Oswald', sans-serif;
+  font-size:11px; font-weight:600;
+  letter-spacing:0.06em;
+  padding:4px 10px; border-radius:20px;
+  background:rgba(200,160,80,0.14);
+  border:1px solid rgba(200,160,80,0.35);
+  color:var(--gold);
+  white-space:nowrap;
+  align-self:center;
+  position:relative; z-index:1;
+}
+#suspectCount.visible { display:block; }
+/* Pulse when count changes */
+#suspectCount.updated { animation:countPulse 0.3s ease-out; }
+@keyframes countPulse {
+  0%  { transform:scale(1);    }
+  50% { transform:scale(1.12); }
+  100%{ transform:scale(1);    }
 }
 
 /* Scrollable content — leaves room for bottom nav */
@@ -283,11 +305,23 @@ html, body {
 #app-content::-webkit-scrollbar { width:0; }
 
 .view { display:none; }
-.view.active { display:block; animation:tabFadeIn 0.15s ease-out; }
+.view.active { display:block; }
+/* slide-in animations — direction set by JS via data-dir attribute */
+.view.active[data-dir="forward"] { animation:slideInRight 0.18s ease-out; }
+.view.active[data-dir="back"]    { animation:slideInLeft  0.18s ease-out; }
+.view.active[data-dir="none"]    { animation:tabFadeIn    0.15s ease-out; }
 
 @keyframes tabFadeIn {
   from { opacity:0; }
   to   { opacity:1; }
+}
+@keyframes slideInRight {
+  from { opacity:0; transform:translateX(18px); }
+  to   { opacity:1; transform:translateX(0);    }
+}
+@keyframes slideInLeft {
+  from { opacity:0; transform:translateX(-18px); }
+  to   { opacity:1; transform:translateX(0);     }
 }
 
 /* ── BOTTOM NAV ── */
@@ -315,6 +349,7 @@ html, body {
   color:rgba(200,160,80,0.30);
   transition:color 0.2s ease, transform 0.15s ease;
 }
+.nav-item i { position:relative; z-index:1; }
 .nav-item.active i { color:var(--gold); transform:scale(1.05); }
 .nav-label {
   font-family:'Oswald', sans-serif;
@@ -322,8 +357,22 @@ html, body {
   letter-spacing:0.08em; text-transform:uppercase;
   color:rgba(200,160,80,0.30);
   transition:color 0.2s ease;
+  position:relative; z-index:1;
 }
 .nav-item.active .nav-label { color:rgba(200,160,80,0.85); }
+/* Active pill background behind icon */
+.nav-item::before {
+  content:'';
+  position:absolute;
+  width:44px; height:32px;
+  border-radius:10px;
+  background:rgba(200,160,80,0);
+  transition:background 0.2s ease;
+  top:6px;
+}
+.nav-item.active::before {
+  background:rgba(200,160,80,0.12);
+}
 /* Active dot indicator */
 .nav-dot {
   width:4px; height:4px; border-radius:50%;
@@ -415,6 +464,36 @@ html, body {
 }
 .reset-btn:active { background:rgba(200,160,80,0.14); color:rgba(200,160,80,0.95); }
 
+/* Filter collapse — compact chip row shown after results appear */
+.filter-chips-collapsed {
+  display:none;
+  flex-wrap:wrap; gap:6px;
+  margin-bottom:10px;
+}
+.filter-chips-collapsed.visible { display:flex; }
+.chip-active {
+  font-family:'Oswald',sans-serif; font-size:11px; font-weight:400;
+  letter-spacing:0.06em; padding:5px 12px; border-radius:20px;
+  background:rgba(200,160,80,0.20);
+  border:1.5px solid rgba(200,160,80,0.60);
+  color:#e8c870; cursor:pointer;
+  display:flex; align-items:center; gap:5px;
+  transition:background 0.12s;
+}
+.chip-active:active { background:rgba(200,160,80,0.32); }
+.chip-active .chip-x { font-size:13px; opacity:0.7; line-height:1; }
+.expand-filters-btn {
+  font-family:'Oswald',sans-serif; font-size:11px; font-weight:300;
+  letter-spacing:0.12em; text-transform:uppercase;
+  color:rgba(200,160,80,0.55); background:transparent; border:none;
+  cursor:pointer; padding:4px 0; display:none;
+}
+.expand-filters-btn.visible { display:block; }
+
+/* Filter sections — hidden when collapsed */
+.filter-sections { transition:all 0.2s ease; }
+.filter-sections.collapsed { display:none; }
+
 /* Results area */
 .results-area { margin-top:14px; min-height:160px; }
 .results-empty {
@@ -445,18 +524,135 @@ html, body {
 .card-still { border-left-color:#7c5ba0; }
 .card-run   { border-left-color:#b84040; }
 
-.rc-name  { font-family:'Special Elite',serif; font-size:17px; color:#e8dfc8; margin-bottom:3px; }
-.rc-speed { font-family:'Oswald',sans-serif; font-size:11px; font-weight:300; color:rgba(200,160,80,0.55); letter-spacing:0.10em; text-transform:uppercase; margin-bottom:9px; }
+.rc-name  { font-family:'Special Elite',serif; font-size:22px; color:#e8dfc8; margin-bottom:3px; line-height:1.2; }
+.rc-speed { font-family:'Oswald',sans-serif; font-size:10px; font-weight:300; color:rgba(200,160,80,0.55); letter-spacing:0.12em; text-transform:uppercase; margin-bottom:9px; }
 .rc-action {
   font-family:'Oswald',sans-serif; font-size:13px; font-weight:600;
   letter-spacing:0.12em; padding:6px 13px; border-radius:20px; display:inline-block;
 }
-.rc-tell   { font-family:'Oswald',sans-serif; font-size:12px; font-weight:300; color:rgba(220,205,170,0.80); margin-top:9px; line-height:1.55; letter-spacing:0.02em; }
+.rc-tell   { font-family:'Oswald',sans-serif; font-size:11px; font-weight:300; color:rgba(220,205,170,0.82); margin-top:9px; line-height:1.55; letter-spacing:0.02em; }
 
 .action-hide  { background:rgba(41,120,180,0.20);  color:#5da8d8; border:1px solid rgba(41,120,180,0.30); }
 .action-loop  { background:rgba(35,160,85,0.18);   color:#4ec47a; border:1px solid rgba(35,160,85,0.28); }
 .action-still { background:rgba(130,80,175,0.20);  color:#b07ed4; border:1px solid rgba(130,80,175,0.30); }
 .action-run   { background:rgba(185,50,50,0.20);   color:#d46060; border:1px solid rgba(185,50,50,0.30); }
+
+
+/* ══════════════════════════════════════════════════════════
+   4b. SPEED CALCULATOR (within Hunt tab)
+   ══════════════════════════════════════════════════════════ */
+
+.speed-calc-wrap { margin-top:8px; }
+
+.speed-calc-card {
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:var(--card-radius);
+  padding:18px 20px;
+  box-shadow:var(--card-shadow);
+}
+
+.speed-calc-instructions {
+  font-family:'Oswald',sans-serif; font-size:11px; font-weight:300;
+  color:rgba(200,178,125,0.55); line-height:1.6; letter-spacing:0.03em;
+  margin-bottom:16px;
+}
+
+/* Large tap button — needs to be easy to hit mid-panic */
+.speed-tap-btn {
+  width:100%; padding:22px 16px;
+  background:rgba(200,160,80,0.08);
+  border:1.5px solid rgba(200,160,80,0.35);
+  border-radius:var(--card-radius);
+  color:var(--gold);
+  font-family:'Oswald',sans-serif; font-size:15px; font-weight:600;
+  letter-spacing:0.14em; text-transform:uppercase;
+  cursor:pointer; display:flex; align-items:center;
+  justify-content:center; gap:10px;
+  transition:background 0.08s, transform 0.08s, border-color 0.08s;
+  position:relative; overflow:hidden;
+  /* No press delay on iOS */
+  touch-action:manipulation;
+}
+.speed-tap-btn i { font-size:22px; }
+/* Physical press feel */
+.speed-tap-btn:active {
+  transform:scale(0.96);
+  background:rgba(200,160,80,0.22);
+  border-color:rgba(200,160,80,0.65);
+}
+/* Flash animation on each tap */
+.speed-tap-btn.tapped { animation:tapFlash 0.15s ease-out; }
+@keyframes tapFlash {
+  0%  { background:rgba(200,160,80,0.30); border-color:rgba(200,160,80,0.80); }
+  100%{ background:rgba(200,160,80,0.08); border-color:rgba(200,160,80,0.35); }
+}
+/* Tap counter badge inside button */
+.tap-count-badge {
+  position:absolute; top:8px; right:10px;
+  font-family:'Oswald',sans-serif; font-size:10px; font-weight:600;
+  color:rgba(200,160,80,0.65); letter-spacing:0.06em;
+}
+
+/* Speed result display */
+.speed-result {
+  margin:14px 0 6px;
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+}
+.speed-result-val {
+  font-family:'Oswald',sans-serif; font-size:38px; font-weight:600;
+  color:var(--gold); letter-spacing:0.04em; line-height:1;
+  animation:numBump 0.25s ease-out;
+}
+.speed-result-label {
+  font-family:'Oswald',sans-serif; font-size:11px; font-weight:300;
+  color:rgba(200,160,80,0.55); letter-spacing:0.12em; text-transform:uppercase;
+}
+
+/* Speed match cards */
+.speed-match-section {
+  margin-top:14px;
+  padding-top:12px;
+  border-top:1px solid rgba(255,255,255,0.06);
+}
+.speed-match-label {
+  font-family:'Oswald',sans-serif; font-size:10px; font-weight:300;
+  color:rgba(200,160,80,0.50); letter-spacing:0.14em; text-transform:uppercase;
+  margin-bottom:8px;
+}
+.speed-match-card {
+  background:rgba(255,255,255,0.02);
+  border:1px solid rgba(255,255,255,0.06);
+  border-left:3px solid;
+  border-radius:0 10px 10px 0;
+  padding:10px 13px; margin-bottom:6px;
+  animation:cardIn 0.2s ease-out both;
+}
+.speed-match-card:nth-child(1){animation-delay:0.00s}
+.speed-match-card:nth-child(2){animation-delay:0.04s}
+.speed-match-card:nth-child(3){animation-delay:0.08s}
+.speed-match-card:nth-child(4){animation-delay:0.12s}
+.smc-name   { font-family:'Special Elite',serif; font-size:14px; color:#e8dfc8; margin-bottom:3px; }
+.smc-speed  { font-family:'Oswald',sans-serif; font-size:10px; font-weight:300; color:rgba(200,160,80,0.55); letter-spacing:0.08em; }
+.smc-action { font-family:'Oswald',sans-serif; font-size:11px; font-weight:600; letter-spacing:0.10em; padding:3px 9px; border-radius:20px; display:inline-block; margin-top:4px; }
+.speed-no-match {
+  font-family:'Oswald',sans-serif; font-size:11px; font-weight:300;
+  color:rgba(200,178,125,0.35); text-align:center; padding:12px 0;
+  letter-spacing:0.08em;
+}
+
+/* Reset button */
+.speed-reset-btn {
+  width:100%; padding:11px; margin-top:12px;
+  background:transparent;
+  border:1px solid rgba(200,160,80,0.22);
+  border-radius:var(--card-radius);
+  color:rgba(200,160,80,0.65);
+  font-family:'Oswald',sans-serif; font-size:11px; font-weight:300;
+  letter-spacing:0.18em; text-transform:uppercase; cursor:pointer;
+  transition:background 0.15s, color 0.15s;
+}
+.speed-reset-btn:active { background:rgba(200,160,80,0.10); color:rgba(200,160,80,0.90); }
 
 
 /* ══════════════════════════════════════════════════════════
@@ -634,6 +830,18 @@ html, body {
   padding:18px 20px 16px;
   margin-bottom:12px;
   box-shadow:var(--card-shadow);
+}
+/* Health bar — visual sanity fill above the number */
+.sanity-bar-track {
+  height:8px; border-radius:4px;
+  background:rgba(255,255,255,0.06);
+  margin-bottom:14px; overflow:hidden;
+  position:relative;
+}
+.sanity-bar-fill {
+  height:100%; border-radius:4px;
+  transition:width 0.1s linear, background 0.3s ease;
+  width:100%; background:#4ec47a;
 }
 .sanity-slider-labels {
   display:flex; justify-content:space-between;
