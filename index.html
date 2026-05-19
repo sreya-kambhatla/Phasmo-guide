@@ -83,36 +83,76 @@
       <span class="app-title-sm">Phasmo Guide</span>
       <span id="currentTabLabel">Hunt &mdash; Survive Right Now</span>
     </div>
+    <span id="suspectCount" aria-live="polite"></span>
   </div>
 
   <div id="app-content">
 
     <!-- ── HUNT ── -->
     <div class="view active" id="view-hunt">
-      <div class="section-label">Speed observed <span class="sl-tag">hunt</span></div>
-      <div class="filter-grid">
-        <div class="filter-btn" data-f="slow"    onclick="toggleFilter(this,event)"><i class="ti ti-run"></i>Very slow</div>
-        <div class="filter-btn" data-f="normal"  onclick="toggleFilter(this,event)"><i class="ti ti-walk"></i>Normal</div>
-        <div class="filter-btn" data-f="fast"    onclick="toggleFilter(this,event)"><i class="ti ti-bolt"></i>Fast</div>
-        <div class="filter-btn" data-f="changes" onclick="toggleFilter(this,event)"><i class="ti ti-arrows-exchange"></i>Speed changes</div>
+      <!-- Active filter chips row — shown when results appear -->
+      <div class="filter-chips-collapsed" id="filterChipsRow"></div>
+      <button class="expand-filters-btn" id="expandFiltersBtn" onclick="expandFilters()">
+        <i class="ti ti-adjustments-horizontal" style="font-size:13px;vertical-align:-2px"></i>
+        &nbsp;Edit filters
+      </button>
+
+      <!-- Full filter sections — hidden when results appear -->
+      <div class="filter-sections" id="filterSections">
+        <div class="section-label">Speed observed <span class="sl-tag">hunt</span></div>
+        <div class="filter-grid">
+          <div class="filter-btn" data-f="slow"    onclick="toggleFilter(this,event)"><i class="ti ti-run"></i>Very slow</div>
+          <div class="filter-btn" data-f="normal"  onclick="toggleFilter(this,event)"><i class="ti ti-walk"></i>Normal</div>
+          <div class="filter-btn" data-f="fast"    onclick="toggleFilter(this,event)"><i class="ti ti-bolt"></i>Fast</div>
+          <div class="filter-btn" data-f="changes" onclick="toggleFilter(this,event)"><i class="ti ti-arrows-exchange"></i>Speed changes</div>
+        </div>
+        <div class="section-label">Behaviour <span class="sl-tag">hunt</span></div>
+        <div class="filter-grid">
+          <div class="filter-btn" data-f="ignores"  onclick="toggleFilter(this,event)"><i class="ti ti-eye-off"></i>Walks past me</div>
+          <div class="filter-btn" data-f="losfast"  onclick="toggleFilter(this,event)"><i class="ti ti-trending-up"></i>Speeds up (LOS)</div>
+          <div class="filter-btn" data-f="slownear" onclick="toggleFilter(this,event)"><i class="ti ti-trending-down"></i>Slows near me</div>
+          <div class="filter-btn" data-f="elec"     onclick="toggleFilter(this,event)"><i class="ti ti-wifi"></i>Reacts to electronics</div>
+        </div>
+        <div class="section-label">Sound / visibility <span class="sl-tag">hunt</span></div>
+        <div class="filter-grid">
+          <div class="filter-btn" data-f="silent"    onclick="toggleFilter(this,event)"><i class="ti ti-volume-off"></i>Silent steps</div>
+          <div class="filter-btn" data-f="heartbeat" onclick="toggleFilter(this,event)"><i class="ti ti-heart-rate-monitor"></i>Loud heartbeat</div>
+          <div class="filter-btn" data-f="invisible" onclick="toggleFilter(this,event)"><i class="ti ti-ghost"></i>Hard to see</div>
+          <div class="filter-btn" data-f="visible"   onclick="toggleFilter(this,event)"><i class="ti ti-eye"></i>Clearly visible</div>
+        </div>
+        <button class="reset-btn" onclick="resetFilters()"><i class="ti ti-refresh" style="font-size:14px"></i> Clear all filters</button>
       </div>
-      <div class="section-label">Behaviour <span class="sl-tag">hunt</span></div>
-      <div class="filter-grid">
-        <div class="filter-btn" data-f="ignores"  onclick="toggleFilter(this,event)"><i class="ti ti-eye-off"></i>Walks past me</div>
-        <div class="filter-btn" data-f="losfast"  onclick="toggleFilter(this,event)"><i class="ti ti-trending-up"></i>Speeds up (LOS)</div>
-        <div class="filter-btn" data-f="slownear" onclick="toggleFilter(this,event)"><i class="ti ti-trending-down"></i>Slows near me</div>
-        <div class="filter-btn" data-f="elec"     onclick="toggleFilter(this,event)"><i class="ti ti-wifi"></i>Reacts to electronics</div>
-      </div>
-      <div class="section-label">Sound / visibility <span class="sl-tag">hunt</span></div>
-      <div class="filter-grid">
-        <div class="filter-btn" data-f="silent"    onclick="toggleFilter(this,event)"><i class="ti ti-volume-off"></i>Silent steps</div>
-        <div class="filter-btn" data-f="heartbeat" onclick="toggleFilter(this,event)"><i class="ti ti-heart-rate-monitor"></i>Loud heartbeat</div>
-        <div class="filter-btn" data-f="invisible" onclick="toggleFilter(this,event)"><i class="ti ti-ghost"></i>Hard to see</div>
-        <div class="filter-btn" data-f="visible"   onclick="toggleFilter(this,event)"><i class="ti ti-eye"></i>Clearly visible</div>
-      </div>
-      <button class="reset-btn" onclick="resetFilters()"><i class="ti ti-refresh" style="font-size:14px"></i> Clear all filters</button>
       <div class="results-area" id="huntResults">
-        <p class="results-empty">// tap filters to narrow down ghosts</p>
+        <p class="results-empty">// start with speed observed above</p>
+      </div>
+
+      <!-- ── SPEED CALCULATOR ── -->
+      <div class="speed-calc-wrap">
+        <div class="section-label">
+          Speed Calculator <span class="sl-tag">tap with footsteps</span>
+        </div>
+        <div class="speed-calc-card" id="speedCalcCard">
+          <div class="speed-calc-instructions">
+            Tap the button in rhythm with the ghost footsteps you hear.
+            After 3+ taps the speed will appear.
+          </div>
+          <!-- Big tap target -->
+          <button class="speed-tap-btn" id="speedTapBtn" onclick="speedTap()">
+            <i class="ti ti-wave-sine"></i>
+            <span id="speedTapLabel">Tap with footsteps</span>
+          </button>
+          <!-- Result display -->
+          <div class="speed-result" id="speedResult" style="display:none">
+            <div class="speed-result-val" id="speedResultVal">— m/s</div>
+            <div class="speed-result-label" id="speedResultLabel">calculating...</div>
+          </div>
+          <!-- Speed match ghosts -->
+          <div id="speedMatchList"></div>
+          <button class="speed-reset-btn" id="speedResetBtn"
+                  onclick="resetSpeedCalc()" style="display:none">
+            &#8635; &nbsp; Reset speed test
+          </button>
+        </div>
       </div>
     </div>
 
@@ -177,6 +217,10 @@
 
       <!-- Slider -->
       <div class="sanity-slider-wrap">
+        <!-- Health bar — fills/drains in real time with slider -->
+        <div class="sanity-bar-track">
+          <div class="sanity-bar-fill" id="sanityBarFill"></div>
+        </div>
         <div class="sanity-slider-labels">
           <span>0%</span><span>50%</span><span>100%</span>
         </div>
