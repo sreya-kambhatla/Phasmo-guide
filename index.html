@@ -81,10 +81,7 @@
   <div id="app-header">
     <div class="hdr-left">
       <span class="app-title-sm">Phasmo Guide</span>
-      <span id="currentTabLabel">Hunt</span>
-    </div>
-    <div class="hamburger" onclick="toggleMenu()" aria-label="Open menu" role="button">
-      <div class="hbar"></div><div class="hbar"></div><div class="hbar"></div>
+      <span id="currentTabLabel">Hunt &mdash; Survive Right Now</span>
     </div>
   </div>
 
@@ -209,29 +206,34 @@
 
   </div><!-- /#app-content -->
 
-  <!-- Hamburger menu -->
-  <div class="menu-overlay" id="menuOverlay" onclick="handleOverlayClick(event)">
-    <div class="menu-panel">
-      <div class="close-x" onclick="closeMenu()"><i class="ti ti-x"></i></div>
-      <div class="menu-hdr"><div class="menu-hdr-title">Phasmo Guide</div></div>
-      <div class="menu-item active" id="mi-hunt"   onclick="switchTab('hunt')">
-        <i class="ti ti-bolt"></i><span class="mi-label">Hunt</span>
-      </div>
-      <div class="menu-item" id="mi-smudge"        onclick="switchTab('smudge')">
-        <i class="ti ti-clock"></i><span class="mi-label">Smudge Timer</span>
-      </div>
-      <div class="menu-item" id="mi-tests"         onclick="switchTab('tests')">
-        <i class="ti ti-flask"></i><span class="mi-label">Ghost Tests</span>
-      </div>
-      <div class="menu-item" id="mi-sanity"        onclick="switchTab('sanity')">
-        <i class="ti ti-brain"></i><span class="mi-label">Sanity</span>
-      </div>
-      <div class="menu-item" id="mi-ghosts"        onclick="switchTab('ghosts')">
-        <i class="ti ti-ghost"></i><span class="mi-label">Ghosts</span>
-      </div>
-      <div class="menu-footer">v2.0 &bull; 29 ghosts &bull; Ghost Tests &bull; Sanity Slider</div>
+  <!-- Bottom navigation bar -->
+  <nav class="bottom-nav" aria-label="Main navigation">
+    <div class="nav-item active" id="ni-hunt"   onclick="switchTab('hunt')"   role="button">
+      <i class="ti ti-bolt"  aria-hidden="true"></i>
+      <span class="nav-label">Hunt</span>
+      <div class="nav-dot"></div>
     </div>
-  </div>
+    <div class="nav-item" id="ni-smudge" onclick="switchTab('smudge')" role="button">
+      <i class="ti ti-clock" aria-hidden="true"></i>
+      <span class="nav-label">Smudge</span>
+      <div class="nav-dot"></div>
+    </div>
+    <div class="nav-item" id="ni-tests"  onclick="switchTab('tests')"  role="button">
+      <i class="ti ti-flask" aria-hidden="true"></i>
+      <span class="nav-label">Tests</span>
+      <div class="nav-dot"></div>
+    </div>
+    <div class="nav-item" id="ni-sanity" onclick="switchTab('sanity')" role="button">
+      <i class="ti ti-brain" aria-hidden="true"></i>
+      <span class="nav-label">Sanity</span>
+      <div class="nav-dot"></div>
+    </div>
+    <div class="nav-item" id="ni-ghosts" onclick="switchTab('ghosts')" role="button">
+      <i class="ti ti-ghost" aria-hidden="true"></i>
+      <span class="nav-label">Ghosts</span>
+      <div class="nav-dot"></div>
+    </div>
+  </nav>
 
 </div><!-- /#app -->
 
