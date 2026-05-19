@@ -1,10 +1,8 @@
 <!DOCTYPE html>
 <!--
-  PHASMO GUIDE — index.html  (Commit 4)
-  UI overhaul: Special Elite + Oswald fonts, hamburger menu,
-  animations, brightness fixes, iOS bell fix.
-  Structure unchanged — only font imports updated.
-  Logic: app.js  |  Styles: style.css  |  Data: data.js
+  PHASMO GUIDE — index.html  (Commit 5)
+  New tabs: Ghost Tests + Sanity (replace Evidence + Quick Ref)
+  Navigation updated to 5 tabs: Hunt | Smudge Timer | Ghost Tests | Sanity | Ghosts
 -->
 <html lang="en">
 <head>
@@ -14,16 +12,10 @@
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="apple-mobile-web-app-title" content="Phasmo Guide"/>
-  <meta name="description" content="Phasmophobia ghost identification — hunt survival, smudge timers, ghost tests. All 29 ghosts."/>
+  <meta name="description" content="Phasmophobia ghost identification — hunt survival, smudge timers, ghost tests, sanity reference. All 29 ghosts."/>
   <title>Phasmo Guide</title>
-
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <!--
-    Special Elite  — headers, ghost names, section labels (typewriter/case-file feel)
-    Oswald         — body text, labels, timer numbers (clean, readable at small sizes)
-    Cinzel         — Enter button only (matches splash aesthetic)
-  -->
   <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Oswald:wght@300;400;600&family=Cinzel:wght@400;600&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
   <link rel="stylesheet" href="style.css"/>
@@ -31,31 +23,19 @@
 
 <body>
 
-<!-- ═══════════════════════════════════════════════════════
-     SPLASH SCREEN
-     ═══════════════════════════════════════════════════════ -->
-
+<!-- ═══════════════════════════════════════════ SPLASH ═══ -->
 <div id="veil"></div>
-
-<div class="corner corner-tl"></div>
-<div class="corner corner-tr"></div>
-<div class="corner corner-bl"></div>
-<div class="corner corner-br"></div>
-
+<div class="corner corner-tl"></div><div class="corner corner-tr"></div>
+<div class="corner corner-bl"></div><div class="corner corner-br"></div>
 <div id="sky"></div>
 <div id="stars"></div>
 
 <div id="bolt">
-  <svg viewBox="0 0 80 240" width="52" height="185"
-       xmlns="http://www.w3.org/2000/svg" overflow="visible">
-    <path d="M40,0 L28,44 L36,44 L22,85 L32,85 L14,130 L26,130 L10,185 L22,185 L8,240"
-      fill="none" stroke="rgba(140,180,255,.10)" stroke-width="32" stroke-linejoin="round" stroke-linecap="round"/>
-    <path d="M40,0 L28,44 L36,44 L22,85 L32,85 L14,130 L26,130 L10,185 L22,185 L8,240"
-      fill="none" stroke="rgba(160,200,255,.26)" stroke-width="14" stroke-linejoin="round" stroke-linecap="round"/>
-    <path d="M40,0 L28,44 L36,44 L22,85 L32,85 L14,130 L26,130 L10,185 L22,185 L8,240"
-      fill="none" stroke="rgba(200,225,255,.55)" stroke-width="5.5" stroke-linejoin="round" stroke-linecap="round"/>
-    <path d="M40,0 L28,44 L36,44 L22,85 L32,85 L14,130 L26,130 L10,185 L22,185 L8,240"
-      fill="none" stroke="rgba(242,250,255,.98)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <svg viewBox="0 0 80 240" width="52" height="185" xmlns="http://www.w3.org/2000/svg" overflow="visible">
+    <path d="M40,0 L28,44 L36,44 L22,85 L32,85 L14,130 L26,130 L10,185 L22,185 L8,240" fill="none" stroke="rgba(140,180,255,.10)" stroke-width="32" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M40,0 L28,44 L36,44 L22,85 L32,85 L14,130 L26,130 L10,185 L22,185 L8,240" fill="none" stroke="rgba(160,200,255,.26)" stroke-width="14" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M40,0 L28,44 L36,44 L22,85 L32,85 L14,130 L26,130 L10,185 L22,185 L8,240" fill="none" stroke="rgba(200,225,255,.55)" stroke-width="5.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M40,0 L28,44 L36,44 L22,85 L32,85 L14,130 L26,130 L10,185 L22,185 L8,240" fill="none" stroke="rgba(242,250,255,.98)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
     <path d="M22,85 L8,108 L0,132 L-6,155" fill="none" stroke="rgba(160,200,255,.20)" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
     <path d="M22,85 L8,108 L0,132 L-6,155" fill="none" stroke="rgba(190,220,255,.58)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
     <path d="M8,108 L0,118 L-8,128" fill="none" stroke="rgba(185,215,255,.38)" stroke-width="1" stroke-linecap="round"/>
@@ -71,50 +51,31 @@
   <img id="house-img" alt="Haunted house silhouette" draggable="false"/>
 </div>
 
-<div class="fog"></div>
-<div class="fog"></div>
-<div class="fog"></div>
+<div class="fog"></div><div class="fog"></div><div class="fog"></div>
 <div id="ground"></div>
 
 <div id="splash">
   <div id="candle-wrap">
     <div id="smoke-wrap">
-      <div class="wisp" id="wisp1">
-        <svg viewBox="0 0 34 95" width="34" height="95" xmlns="http://www.w3.org/2000/svg">
-          <path id="wpath1" d="M17,92 C14,76 22,60 11,44 C3,31 19,17 13,2" stroke="rgba(185,180,195,.52)" stroke-width="2.5"/>
-        </svg>
-      </div>
-      <div class="wisp" id="wisp2">
-        <svg viewBox="0 0 34 95" width="34" height="95" xmlns="http://www.w3.org/2000/svg">
-          <path id="wpath2" d="M17,92 C20,74 9,57 21,42 C30,29 14,14 20,2" stroke="rgba(180,175,190,.44)" stroke-width="2"/>
-        </svg>
-      </div>
-      <div class="wisp" id="wisp3">
-        <svg viewBox="0 0 34 95" width="34" height="95" xmlns="http://www.w3.org/2000/svg">
-          <path id="wpath3" d="M17,92 C16,78 18,62 14,48 C11,36 18,22 16,2" stroke="rgba(178,173,188,.34)" stroke-width="1.5"/>
-        </svg>
-      </div>
+      <div class="wisp" id="wisp1"><svg viewBox="0 0 34 95" width="34" height="95" xmlns="http://www.w3.org/2000/svg"><path id="wpath1" d="M17,92 C14,76 22,60 11,44 C3,31 19,17 13,2" stroke="rgba(185,180,195,.52)" stroke-width="2.5"/></svg></div>
+      <div class="wisp" id="wisp2"><svg viewBox="0 0 34 95" width="34" height="95" xmlns="http://www.w3.org/2000/svg"><path id="wpath2" d="M17,92 C20,74 9,57 21,42 C30,29 14,14 20,2" stroke="rgba(180,175,190,.44)" stroke-width="2"/></svg></div>
+      <div class="wisp" id="wisp3"><svg viewBox="0 0 34 95" width="34" height="95" xmlns="http://www.w3.org/2000/svg"><path id="wpath3" d="M17,92 C16,78 18,62 14,48 C11,36 18,22 16,2" stroke="rgba(178,173,188,.34)" stroke-width="1.5"/></svg></div>
     </div>
-    <div class="flame-glow"  id="flameGlow"></div>
+    <div class="flame-glow" id="flameGlow"></div>
     <div class="flame-outer" id="flameOuter"><div class="flame-inner"></div></div>
     <div class="candle-wick" id="wick"></div>
     <div class="candle-body"></div>
   </div>
-
   <div id="title-wrap">
     <div id="title-main">Phasmo Guide</div>
     <div class="title-divider"></div>
     <div id="title-sub">Ghost Field Journal</div>
   </div>
-
   <button id="enter-btn" onclick="enterApp()">&#9670; &nbsp;Enter&nbsp; &#9670;</button>
 </div>
 
 
-<!-- ═══════════════════════════════════════════════════════
-     APP SHELL
-     No lightning or house flash here — splash only.
-     ═══════════════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════ APP ═══════ -->
 <div id="app">
 
   <div id="app-header">
@@ -123,15 +84,13 @@
       <span id="currentTabLabel">Hunt</span>
     </div>
     <div class="hamburger" onclick="toggleMenu()" aria-label="Open menu" role="button">
-      <div class="hbar"></div>
-      <div class="hbar"></div>
-      <div class="hbar"></div>
+      <div class="hbar"></div><div class="hbar"></div><div class="hbar"></div>
     </div>
   </div>
 
   <div id="app-content">
 
-    <!-- HUNT -->
+    <!-- ── HUNT ── -->
     <div class="view active" id="view-hunt">
       <div class="section-label">Speed observed <span class="sl-tag">hunt</span></div>
       <div class="filter-grid">
@@ -160,84 +119,87 @@
       </div>
     </div>
 
-    <!-- SMUDGE -->
+    <!-- ── SMUDGE ── -->
     <div class="view" id="view-smudge">
       <div class="section-label">After smudging <span class="sl-tag">smudge timer</span></div>
-
       <div class="timer-card" id="tc-spirit">
         <div class="timer-row">
-          <div>
-            <div class="timer-ghost">Spirit</div>
-            <span class="timer-badge badge-good">No hunt → confirmed Spirit</span>
-          </div>
+          <div><div class="timer-ghost">Spirit</div><span class="timer-badge badge-good">No hunt → confirmed Spirit</span></div>
           <div class="timer-val" id="t-spirit">3:00</div>
         </div>
         <div class="timer-bar"><div class="timer-fill" id="b-spirit"></div></div>
       </div>
-
       <div class="timer-card" id="tc-others">
         <div class="timer-row">
-          <div>
-            <div class="timer-ghost">All Others</div>
-            <span class="timer-badge badge-neutral">Standard rehunt window</span>
-          </div>
+          <div><div class="timer-ghost">All Others</div><span class="timer-badge badge-neutral">Standard rehunt window</span></div>
           <div class="timer-val" id="t-others">1:30</div>
         </div>
         <div class="timer-bar"><div class="timer-fill" id="b-others"></div></div>
       </div>
-
       <div class="timer-card" id="tc-demon">
         <div class="timer-row">
-          <div>
-            <div class="timer-ghost">Demon</div>
-            <span class="timer-badge badge-danger">Hunt before this = Demon!</span>
-          </div>
+          <div><div class="timer-ghost">Demon</div><span class="timer-badge badge-danger">Hunt before this = Demon!</span></div>
           <div class="timer-val" id="t-demon">1:00</div>
         </div>
         <div class="timer-bar"><div class="timer-fill" id="b-demon"></div></div>
       </div>
-
       <button class="big-btn" id="smudgeBtn" onclick="startSmudge(this,event)">Start smudge timer</button>
       <button class="small-btn" onclick="resetSmudge()">&#8635; &nbsp; Reset</button>
-
       <div class="divider-line"></div>
-
       <div class="section-label">Hunt just ended <span class="sl-tag">cooldown</span></div>
-
       <div class="timer-card" id="tc-cd-demon">
         <div class="timer-row">
-          <div>
-            <div class="timer-ghost">Demon</div>
-            <span class="timer-badge badge-danger">Shortest cooldown in game</span>
-          </div>
+          <div><div class="timer-ghost">Demon</div><span class="timer-badge badge-danger">Shortest cooldown in game</span></div>
           <div class="timer-val" id="cd-demon">0:20</div>
         </div>
         <div class="timer-bar"><div class="timer-fill" id="bcd-demon"></div></div>
       </div>
-
       <div class="timer-card" id="tc-cd-others">
         <div class="timer-row">
-          <div>
-            <div class="timer-ghost">All Others</div>
-            <span class="timer-badge badge-neutral">Standard cooldown</span>
-          </div>
+          <div><div class="timer-ghost">All Others</div><span class="timer-badge badge-neutral">Standard cooldown</span></div>
           <div class="timer-val" id="cd-others">0:25</div>
         </div>
         <div class="timer-bar"><div class="timer-fill" id="bcd-others"></div></div>
       </div>
-
       <button class="big-btn" id="cdBtn" onclick="startCooldown(this,event)">Hunt just ended</button>
       <button class="small-btn" onclick="resetCooldown()">&#8635; &nbsp; Reset cooldown</button>
     </div>
 
-    <!-- EVIDENCE -->
-    <div class="view" id="view-evidence">
-      <div class="section-label">Evidence <span class="sl-tag">tap once = found &bull; twice = ruled out</span></div>
-      <div class="ev-grid" id="evGrid"></div>
-      <div id="evGhostList"></div>
+    <!-- ── GHOST TESTS ── -->
+    <div class="view" id="view-tests">
+      <input class="ghost-search" type="text"
+             placeholder="Search ghost tests..."
+             oninput="filterTests(this.value)"/>
+      <div class="section-label">Tap a card to reveal full test details <span class="sl-tag">flip</span></div>
+      <div id="testCards"></div>
     </div>
 
-    <!-- GHOSTS -->
+    <!-- ── SANITY ── -->
+    <div class="view" id="view-sanity">
+      <div class="section-label">Your current sanity <span class="sl-tag">drag slider</span></div>
+
+      <!-- Slider -->
+      <div class="sanity-slider-wrap">
+        <div class="sanity-slider-labels">
+          <span>0%</span><span>50%</span><span>100%</span>
+        </div>
+        <input type="range" id="sanitySlider" min="0" max="100" value="100"
+               oninput="updateSanitySlider(this.value)"/>
+        <div class="sanity-slider-val">
+          <span id="sanityValDisplay">100%</span>
+          <span class="sanity-val-label">average team sanity</span>
+        </div>
+      </div>
+
+      <!-- Threat summary -->
+      <div class="sanity-summary" id="sanitySummary"></div>
+
+      <!-- Ghost list -->
+      <div class="section-label" style="margin-top:14px">All ghosts — hunt thresholds <span class="sl-tag">tap to expand</span></div>
+      <div id="sanityCards"></div>
+    </div>
+
+    <!-- ── GHOSTS ── -->
     <div class="view" id="view-ghosts">
       <input class="ghost-search" type="text"
              placeholder="Search all 29 ghosts..."
@@ -245,42 +207,29 @@
       <div id="ghostCards"></div>
     </div>
 
-    <!-- QUICK REF -->
-    <div class="view" id="view-quick">
-      <div class="section-label">Survival tips <span class="sl-tag">all 29 ghosts</span></div>
-      <div id="quickList"></div>
-    </div>
-
   </div><!-- /#app-content -->
 
-  <!-- Hamburger slide menu -->
+  <!-- Hamburger menu -->
   <div class="menu-overlay" id="menuOverlay" onclick="handleOverlayClick(event)">
     <div class="menu-panel">
       <div class="close-x" onclick="closeMenu()"><i class="ti ti-x"></i></div>
-      <div class="menu-hdr">
-        <div class="menu-hdr-title">Phasmo Guide</div>
+      <div class="menu-hdr"><div class="menu-hdr-title">Phasmo Guide</div></div>
+      <div class="menu-item active" id="mi-hunt"   onclick="switchTab('hunt')">
+        <i class="ti ti-bolt"></i><span class="mi-label">Hunt</span>
       </div>
-      <div class="menu-item active" id="mi-hunt"     onclick="switchTab('hunt')">
-        <i class="ti ti-bolt"></i>
-        <span class="mi-label">Hunt</span>
+      <div class="menu-item" id="mi-smudge"        onclick="switchTab('smudge')">
+        <i class="ti ti-clock"></i><span class="mi-label">Smudge Timer</span>
       </div>
-      <div class="menu-item" id="mi-smudge"   onclick="switchTab('smudge')">
-        <i class="ti ti-clock"></i>
-        <span class="mi-label">Smudge Timer</span>
+      <div class="menu-item" id="mi-tests"         onclick="switchTab('tests')">
+        <i class="ti ti-flask"></i><span class="mi-label">Ghost Tests</span>
       </div>
-      <div class="menu-item" id="mi-evidence" onclick="switchTab('evidence')">
-        <i class="ti ti-search"></i>
-        <span class="mi-label">Evidence</span>
+      <div class="menu-item" id="mi-sanity"        onclick="switchTab('sanity')">
+        <i class="ti ti-brain"></i><span class="mi-label">Sanity</span>
       </div>
-      <div class="menu-item" id="mi-ghosts"   onclick="switchTab('ghosts')">
-        <i class="ti ti-ghost"></i>
-        <span class="mi-label">Ghosts</span>
+      <div class="menu-item" id="mi-ghosts"        onclick="switchTab('ghosts')">
+        <i class="ti ti-ghost"></i><span class="mi-label">Ghosts</span>
       </div>
-      <div class="menu-item" id="mi-quick"    onclick="switchTab('quick')">
-        <i class="ti ti-list"></i>
-        <span class="mi-label">Quick Ref</span>
-      </div>
-      <div class="menu-footer">v1.0 &bull; 29 ghosts &bull; Aswang &amp; Kormos included</div>
+      <div class="menu-footer">v2.0 &bull; 29 ghosts &bull; Ghost Tests &bull; Sanity Slider</div>
     </div>
   </div>
 
