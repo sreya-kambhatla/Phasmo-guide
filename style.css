@@ -618,12 +618,213 @@ html, body {
 
 
 /* ══════════════════════════════════════════════════════════
-   8. QUICK REF TAB
+   8. GHOST TESTS TAB
+   Flip cards: front = test, back = full details
    ══════════════════════════════════════════════════════════ */
 
-.qr-row  { display:flex; align-items:flex-start; gap:8px; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.04); }
-.qr-name { font-family:'Special Elite',serif; font-size:12px; color:var(--gold); min-width:82px; flex-shrink:0; }
-.qr-tip  { font-family:'Oswald',sans-serif; font-size:11px; font-weight:300; color:rgba(200,190,165,0.60); line-height:1.5; letter-spacing:0.02em; }
+/* Flip card container — fixed height so back fits */
+.test-card-wrap {
+  perspective: 1000px;
+  margin-bottom: 9px;
+  min-height: 110px;
+}
+.test-card {
+  position: relative;
+  width: 100%;
+  min-height: 110px;
+  transform-style: preserve-3d;
+  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+.test-card.flipped { transform: rotateY(180deg); }
+
+/* Both faces share base styles */
+.test-face {
+  position: absolute;
+  width: 100%;
+  min-height: 110px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 6px;
+  padding: 12px 14px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+}
+
+/* Front face */
+.test-front {
+  border-left: 3px solid rgba(200,160,80,0.55);
+}
+.test-front-name {
+  font-family: 'Special Elite', serif;
+  font-size: 15px; color: #e8dfc8; margin-bottom: 5px;
+}
+.test-front-test {
+  font-family: 'Oswald', sans-serif;
+  font-size: 12px; font-weight: 400;
+  color: rgba(220,205,170,0.80); line-height: 1.5; letter-spacing: 0.02em;
+  margin-bottom: 8px;
+}
+.test-flip-hint {
+  font-family: 'Oswald', sans-serif;
+  font-size: 9px; font-weight: 300;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(200,160,80,0.40);
+}
+
+/* Difficulty badge on front */
+.test-diff {
+  font-family: 'Oswald', sans-serif;
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.08em; padding: 2px 8px;
+  border-radius: 2px; display: inline-block; margin-bottom: 7px;
+}
+.diff-safe  { background:rgba(35,160,85,0.15); color:#4ec47a; border:1px solid rgba(35,160,85,0.25); }
+.diff-risky { background:rgba(200,160,80,0.12); color:rgba(200,160,80,0.90); border:1px solid rgba(200,160,80,0.22); }
+.diff-hunt  { background:rgba(185,50,50,0.18); color:#d46060; border:1px solid rgba(185,50,50,0.28); animation:dangerBreathe 2.5s ease-in-out infinite alternate; }
+
+/* Back face */
+.test-back {
+  transform: rotateY(180deg);
+  border-left: 3px solid rgba(41,120,180,0.55);
+  display: flex; flex-direction: column; gap: 6px;
+}
+.test-back-row {
+  display: flex; gap: 6px; font-size: 11px;
+}
+.test-back-lbl {
+  font-family: 'Oswald', sans-serif; font-weight: 300;
+  color: rgba(200,160,80,0.45); min-width: 60px; flex-shrink: 0;
+  letter-spacing: 0.04em; text-transform: uppercase; font-size: 10px;
+  padding-top: 1px;
+}
+.test-back-val {
+  font-family: 'Oswald', sans-serif; font-weight: 400;
+  color: rgba(220,210,190,0.75); line-height: 1.5;
+}
+.test-positive { color: #4ec47a; }
+.test-negative { color: #d46060; }
+.test-warning  {
+  font-family: 'Oswald', sans-serif; font-size: 10px; font-weight: 600;
+  color: rgba(200,160,80,0.80); letter-spacing: 0.06em;
+  margin-top: 2px; padding: 3px 8px;
+  background: rgba(200,160,80,0.08); border-radius: 2px;
+  border-left: 2px solid rgba(200,160,80,0.4);
+}
+.test-flip-back {
+  font-family: 'Oswald', sans-serif; font-size: 9px; font-weight: 300;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(200,160,80,0.35); margin-top: 4px;
+}
+
+
+/* ══════════════════════════════════════════════════════════
+   9. SANITY TAB
+   Slider + real-time colour-coded ghost threat list
+   ══════════════════════════════════════════════════════════ */
+
+/* Slider */
+.sanity-slider-wrap {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px 14px 12px;
+  margin-bottom: 10px;
+}
+.sanity-slider-labels {
+  display: flex; justify-content: space-between;
+  font-family: 'Oswald', sans-serif; font-size: 9px; font-weight: 300;
+  color: rgba(200,160,80,0.40); letter-spacing: 0.10em;
+  margin-bottom: 6px;
+}
+#sanitySlider {
+  width: 100%; height: 4px;
+  -webkit-appearance: none; appearance: none;
+  background: rgba(255,255,255,0.08);
+  border-radius: 2px; outline: none; cursor: pointer;
+  margin-bottom: 10px;
+}
+#sanitySlider::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--gold);
+  border: 2px solid rgba(200,160,80,0.40);
+  box-shadow: 0 0 8px rgba(200,160,80,0.40);
+  cursor: pointer;
+}
+#sanitySlider::-moz-range-thumb {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--gold);
+  border: 2px solid rgba(200,160,80,0.40);
+  cursor: pointer;
+}
+.sanity-slider-val {
+  display: flex; align-items: baseline; gap: 8px;
+}
+#sanityValDisplay {
+  font-family: 'Oswald', sans-serif; font-size: 28px; font-weight: 600;
+  color: var(--gold); letter-spacing: 0.04em; transition: color 0.3s ease;
+}
+#sanityValDisplay.warning { color: #c07820; }
+#sanityValDisplay.danger  { color: #c04040; }
+.sanity-val-label {
+  font-family: 'Oswald', sans-serif; font-size: 10px; font-weight: 300;
+  color: rgba(200,160,80,0.45); letter-spacing: 0.10em; text-transform: uppercase;
+}
+
+/* Threat summary pill row */
+.sanity-summary {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  margin-bottom: 4px; min-height: 28px;
+  align-items: center;
+}
+.summary-pill {
+  font-family: 'Oswald', sans-serif; font-size: 10px; font-weight: 600;
+  letter-spacing: 0.06em; padding: 3px 10px; border-radius: 2px;
+}
+.pill-safe    { background:rgba(35,160,85,0.12);  color:#4ec47a; border:1px solid rgba(35,160,85,0.22); }
+.pill-warn    { background:rgba(200,160,80,0.12); color:rgba(200,160,80,0.90); border:1px solid rgba(200,160,80,0.22); }
+.pill-danger  { background:rgba(185,50,50,0.18);  color:#d46060; border:1px solid rgba(185,50,50,0.28); }
+
+/* Sanity ghost cards */
+.sanity-card {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-left: 3px solid;
+  border-radius: 0 6px 6px 0;
+  padding: 11px 13px; margin-bottom: 6px;
+  cursor: pointer;
+  transition: opacity 0.3s ease, border-left-color 0.3s ease, background 0.3s ease;
+}
+/* Three threat states */
+.sanity-card.state-safe    { border-left-color:rgba(35,160,85,0.50);  opacity:0.30; }
+.sanity-card.state-warn    { border-left-color:rgba(200,160,80,0.70); opacity:1.00; }
+.sanity-card.state-danger  { border-left-color:rgba(185,50,50,0.80);  opacity:1.00; background:#100a0a; }
+
+.sc-header { display:flex; align-items:center; justify-content:space-between; }
+.sc-name   { font-family:'Special Elite',serif; font-size:13px; color:#e8dfc8; }
+.sc-threshold {
+  font-family:'Oswald',sans-serif; font-size:18px; font-weight:600;
+  letter-spacing:0.04em;
+}
+.sc-threshold.th-safe   { color:rgba(35,160,85,0.55); }
+.sc-threshold.th-warn   { color:var(--gold); }
+.sc-threshold.th-danger { color:#d46060; }
+
+.sc-special {
+  font-family:'Oswald',sans-serif; font-size:10px; font-weight:300;
+  color:rgba(200,178,125,0.50); margin-top:3px; line-height:1.4; letter-spacing:0.02em;
+}
+/* Expanded body */
+.sc-body { display:none; margin-top:9px; padding-top:9px; border-top:1px solid rgba(255,255,255,0.06); }
+.sc-body.open { display:block; }
+.sc-drain {
+  font-family:'Oswald',sans-serif; font-size:11px; font-weight:400;
+  color:#d46060; margin-top:4px; line-height:1.5; letter-spacing:0.02em;
+  padding: 4px 8px;
+  background:rgba(185,50,50,0.10); border-radius:2px;
+  border-left:2px solid rgba(185,50,50,0.40);
+}
 
 
 /* ══════════════════════════════════════════════════════════
