@@ -235,7 +235,15 @@
 
 </div><!-- /#app -->
 
-<script src="data.js" defer></script>
-<script src="app.js" defer></script>
+<!--
+  NO defer here — we need guaranteed sequential execution:
+  1. data.js runs first  → GHOSTS, GHOST_TESTS, SANITY_GHOSTS all defined
+  2. app.js runs second → can safely reference all data arrays
+  Using defer caused a race condition on mobile Safari where app.js
+  ran before data.js finished, leaving dynamic tabs (Ghosts, Tests,
+  Sanity) completely blank.
+-->
+<script src="data.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
