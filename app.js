@@ -127,35 +127,40 @@ function setupSmokePaths() {
 
 /* ══════════════════════════════════════════════════════════
    4. BELL — iOS-SAFE WEB AUDIO API
-   
-   THE FIX:
-   iOS Safari requires AudioContext to be created AND resumed
-   synchronously inside a user gesture handler. If you await
-   anything before creating the context, iOS considers the
-   gesture "consumed" and blocks audio.
 
-   OLD (broken on iOS):
-     async function enterApp() {
-       const ctx = await getAudioCtx();  // await = gesture consumed
-       ...
+   iOS Safari has two hard requirements:
+   1. AudioContext must be CREATED synchronously inside a user
+      gesture — if you await anything before new AudioContext(),
+      iOS considers the gesture "consumed" and blocks audio.
+   2. AudioContext must be in RUNNING state before scheduling
+      oscillators — ctx.resume() is async so we must await it
+      before calling osc.start().
+
+   The pattern that satisfies both:
+     function enterApp() {             ← synchronous click handler
+       const ctx = new AudioContext(); ← created synchronously ✓
+       scheduleBell(ctx);              ← passes ctx to async fn
      }
-
-   NEW (works on iOS):
-     function enterApp() {
-       // Create context synchronously — no await before this
-       const ctx = new AudioContext();
-       ctx.resume();  // fire and forget — no await
-       playBell(ctx); // pass context directly
+     async function scheduleBell(ctx) {
+       await ctx.resume();             ← awaits running state ✓
+       playBell(ctx);                  ← safe to schedule now ✓
      }
    ══════════════════════════════════════════════════════════ */
 
 function createBellContext() {
-  // Must be called synchronously inside the click handler
-  const ctx = new (window.AudioContext || window.webkitAudioContext)();
-  // resume() is a promise but we don't await it here
-  // iOS resumes it as part of the user gesture
-  ctx.resume();
-  return ctx;
+  // Must be called synchronously — no await before this line
+  return new (window.AudioContext || window.webkitAudioContext)();
+}
+
+async function scheduleBell(ctx) {
+  // Wait for context to actually reach running state before
+  // scheduling any oscillators — this is what was missing on iOS
+  try {
+    await ctx.resume();
+  } catch (e) {
+    // resume() can fail silently on some browsers — continue anyway
+  }
+  playBell(ctx);
 }
 
 function playBell(ctx) {
@@ -167,13 +172,16 @@ function playBell(ctx) {
     osc.type = 'sine';
     osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
     gain.gain.setValueAtTime(vol,      ctx.currentTime + delay);
+    // exponentialRamp needs a non-zero target — 0.0001 is inaudible
     gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + delay + 4.5);
     osc.start(ctx.currentTime + delay);
     osc.stop(ctx.currentTime  + delay + 5);
   }
-  tone(220, 0.70, 0.00);
-  tone(293, 0.40, 0.00);
-  tone(220, 0.30, 0.09);
+  // First toll — three overlapping frequencies for richer texture
+  tone(220, 0.70, 0.00); // A3 — deep fundamental
+  tone(293, 0.40, 0.00); // D4 — shimmer overtone
+  tone(220, 0.30, 0.09); // slight echo
+  // Second softer toll after 2.3s
   setTimeout(() => { tone(196, 0.45, 0); tone(261, 0.28, 0); }, 2300);
 }
 
@@ -188,8 +196,9 @@ function enterApp() {
   hasEntered = true;
   document.getElementById('enter-btn').disabled = true;
 
-  // Create AudioContext SYNCHRONOUSLY here — before any async work
-  // This is the iOS fix — must happen at the top of the click handler
+  // Create AudioContext synchronously at the top of the click handler
+  // iOS Safari requires this — if anything awaits before this line,
+  // the gesture is "consumed" and audio is blocked
   const bellCtx = createBellContext();
 
   const flameOuter = document.getElementById('flameOuter');
@@ -223,8 +232,9 @@ function enterApp() {
     });
   }, 440);
 
-  // Bell — use the context we created synchronously above
-  setTimeout(() => playBell(bellCtx), 800);
+  // scheduleBell awaits ctx.resume() before playing tones
+  // This is what was missing — iOS needs the context actually running
+  setTimeout(() => scheduleBell(bellCtx), 800);
 
   // Screen fade
   setTimeout(() => document.getElementById('splash').classList.add('fade-out'), 1600);
