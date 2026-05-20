@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<!--
+  PHASMO GUIDE — index.html  (Commit 5)
+  New tabs: Ghost Tests + Sanity (replace Evidence + Quick Ref)
+  Navigation updated to 5 tabs: Hunt | Smudge Timer | Ghost Tests | Sanity | Ghosts
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta name="theme-color" content="#000000"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Phasmo Guide"/>
+  <meta name="description" content="Phasmophobia ghost identification — hunt survival, smudge timers, ghost tests, sanity reference. All 29 ghosts."/>
+  <title>Phasmo Guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Oswald:wght@300;400;600&family=Cinzel:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+
+<body>
+
+<!-- ═══════════════════════════════════════════ SPLASH ═══ -->
+<div id="veil"></div>
+<div class="corner corner-tl"></div><div class="corner corner-tr"></div>
+<div class="corner corner-bl"></div><div class="corner corner-br"></div>
+<div id="sky"></div>
+<div id="stars"></div>
+
+<div id="bolt">
+  <svg viewBox="0 0 80 240" width="52" height="185" xmlns="http://www.w3.org/2000/svg" overflow="visible">
+    <path d="M40,0 L28,44 L36,44 L22,85 L32,85 L14,130 L26,130 L10,185 L22,185 L8,240" fill="none" stroke="rgba(140,180,255,.10)" stroke-width="32" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M40,0 L28,44 L36,44 L22,85 L32,85 L14,130 L26,130 L10,185 L22,185 L8,240" fill="none" stroke="rgba(160,200,255,.26)" stroke-width="14" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M40,0 L28,44 L36,44 L22,85 L32,85 L14,130 L26,130 L10,185 L22,185 L8,240" fill="none" stroke="rgba(200,225,255,.55)" stroke-width="5.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M40,0 L28,44 L36,44 L22,85 L32,85 L14,130 L26,130 L10,185 L22,185 L8,240" fill="none" stroke="rgba(242,250,255,.98)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M22,85 L8,108 L0,132 L-6,155" fill="none" stroke="rgba(160,200,255,.20)" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M22,85 L8,108 L0,132 L-6,155" fill="none" stroke="rgba(190,220,255,.58)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M8,108 L0,118 L-8,128" fill="none" stroke="rgba(185,215,255,.38)" stroke-width="1" stroke-linecap="round"/>
+    <path d="M14,130 L28,152 L34,172" fill="none" stroke="rgba(160,200,255,.18)" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M14,130 L28,152 L34,172" fill="none" stroke="rgba(190,220,255,.50)" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M-6,155 L-12,164" fill="none" stroke="rgba(180,210,255,.26)" stroke-width=".8" stroke-linecap="round"/>
+    <path d="M-6,155 L-2,165"  fill="none" stroke="rgba(180,210,255,.20)" stroke-width=".7" stroke-linecap="round"/>
+    <path d="M34,172 L40,180"  fill="none" stroke="rgba(180,210,255,.24)" stroke-width=".8" stroke-linecap="round"/>
+  </svg>
+</div>
+
+<div id="house-wrap">
+  <img id="house-img" alt="Haunted house silhouette" draggable="false"/>
+</div>
+
+<div class="fog"></div><div class="fog"></div><div class="fog"></div>
+<div id="ground"></div>
+
+<div id="splash">
+  <div id="candle-wrap">
+    <div id="smoke-wrap">
+      <div class="wisp" id="wisp1"><svg viewBox="0 0 34 95" width="34" height="95" xmlns="http://www.w3.org/2000/svg"><path id="wpath1" d="M17,92 C14,76 22,60 11,44 C3,31 19,17 13,2" stroke="rgba(185,180,195,.52)" stroke-width="2.5"/></svg></div>
+      <div class="wisp" id="wisp2"><svg viewBox="0 0 34 95" width="34" height="95" xmlns="http://www.w3.org/2000/svg"><path id="wpath2" d="M17,92 C20,74 9,57 21,42 C30,29 14,14 20,2" stroke="rgba(180,175,190,.44)" stroke-width="2"/></svg></div>
+      <div class="wisp" id="wisp3"><svg viewBox="0 0 34 95" width="34" height="95" xmlns="http://www.w3.org/2000/svg"><path id="wpath3" d="M17,92 C16,78 18,62 14,48 C11,36 18,22 16,2" stroke="rgba(178,173,188,.34)" stroke-width="1.5"/></svg></div>
+    </div>
+    <div class="flame-glow" id="flameGlow"></div>
+    <div class="flame-outer" id="flameOuter"><div class="flame-inner"></div></div>
+    <div class="candle-wick" id="wick"></div>
+    <div class="candle-body"></div>
+  </div>
+  <div id="title-wrap">
+    <div id="title-main">Phasmo Guide</div>
+    <div class="title-divider"></div>
+    <div id="title-sub">Ghost Field Journal</div>
+  </div>
+  <button id="enter-btn" onclick="enterApp()">&#9670; &nbsp;Enter&nbsp; &#9670;</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════ APP ═══════ -->
+<div id="app">
+
+  <div id="app-header">
+    <div class="hdr-left">
+      <span class="app-title-sm">Phasmo Guide</span>
+      <span id="currentTabLabel">Hunt &mdash; Survive Right Now</span>
+    </div>
+    <span id="suspectCount" aria-live="polite"></span>
+  </div>
+
+  <div id="app-content">
+
+    <!-- ── HUNT ── -->
+    <div class="view active" id="view-hunt">
+      <!-- Active filter chips row — shown when results appear -->
+      <div class="filter-chips-collapsed" id="filterChipsRow"></div>
+      <button class="expand-filters-btn" id="expandFiltersBtn" onclick="expandFilters()">
+        <i class="ti ti-adjustments-horizontal" style="font-size:13px;vertical-align:-2px"></i>
+        &nbsp;Edit filters
+      </button>
+
+      <!-- Full filter sections — hidden when results appear -->
+      <div class="filter-sections" id="filterSections">
+        <div class="section-label">Speed observed <span class="sl-tag">hunt</span></div>
+        <div class="filter-grid">
+          <div class="filter-btn" data-f="slow"    onclick="toggleFilter(this,event)"><i class="ti ti-run"></i>Very slow</div>
+          <div class="filter-btn" data-f="normal"  onclick="toggleFilter(this,event)"><i class="ti ti-walk"></i>Normal</div>
+          <div class="filter-btn" data-f="fast"    onclick="toggleFilter(this,event)"><i class="ti ti-bolt"></i>Fast</div>
+          <div class="filter-btn" data-f="changes" onclick="toggleFilter(this,event)"><i class="ti ti-arrows-exchange"></i>Speed changes</div>
+        </div>
+        <div class="section-label">Behaviour <span class="sl-tag">hunt</span></div>
+        <div class="filter-grid">
+          <div class="filter-btn" data-f="ignores"  onclick="toggleFilter(this,event)"><i class="ti ti-eye-off"></i>Walks past me</div>
+          <div class="filter-btn" data-f="losfast"  onclick="toggleFilter(this,event)"><i class="ti ti-trending-up"></i>Speeds up (LOS)</div>
+          <div class="filter-btn" data-f="slownear" onclick="toggleFilter(this,event)"><i class="ti ti-trending-down"></i>Slows near me</div>
+          <div class="filter-btn" data-f="elec"     onclick="toggleFilter(this,event)"><i class="ti ti-wifi"></i>Reacts to electronics</div>
+        </div>
+        <div class="section-label">Sound / visibility <span class="sl-tag">hunt</span></div>
+        <div class="filter-grid">
+          <div class="filter-btn" data-f="silent"    onclick="toggleFilter(this,event)"><i class="ti ti-volume-off"></i>Silent steps</div>
+          <div class="filter-btn" data-f="heartbeat" onclick="toggleFilter(this,event)"><i class="ti ti-heart-rate-monitor"></i>Loud heartbeat</div>
+          <div class="filter-btn" data-f="invisible" onclick="toggleFilter(this,event)"><i class="ti ti-ghost"></i>Hard to see</div>
+          <div class="filter-btn" data-f="visible"   onclick="toggleFilter(this,event)"><i class="ti ti-eye"></i>Clearly visible</div>
+        </div>
+        <button class="reset-btn" onclick="resetFilters()"><i class="ti ti-refresh" style="font-size:14px"></i> Clear all filters</button>
+      </div>
+      <div class="results-area" id="huntResults">
+        <p class="results-empty">// start with speed observed above</p>
+      </div>
+
+      <!-- ── SPEED CALCULATOR ── -->
+      <div class="speed-calc-wrap">
+        <div class="section-label">
+          Speed Calculator <span class="sl-tag">tap with footsteps</span>
+        </div>
+        <div class="speed-calc-card" id="speedCalcCard">
+          <div class="speed-calc-instructions">
+            Tap the button in rhythm with the ghost footsteps you hear.
+            After 3+ taps the speed will appear.
+          </div>
+          <!-- Big tap target -->
+          <button class="speed-tap-btn" id="speedTapBtn" onclick="speedTap()">
+            <i class="ti ti-wave-sine"></i>
+            <span id="speedTapLabel">Tap with footsteps</span>
+          </button>
+          <!-- Result display -->
+          <div class="speed-result" id="speedResult" style="display:none">
+            <div class="speed-result-val" id="speedResultVal">— m/s</div>
+            <div class="speed-result-label" id="speedResultLabel">calculating...</div>
+          </div>
+          <!-- Speed match ghosts -->
+          <div id="speedMatchList"></div>
+          <button class="speed-reset-btn" id="speedResetBtn"
+                  onclick="resetSpeedCalc()" style="display:none">
+            &#8635; &nbsp; Reset speed test
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SMUDGE ── -->
+    <div class="view" id="view-smudge">
+      <div class="section-label">After smudging <span class="sl-tag">smudge timer</span></div>
+      <div class="timer-card" id="tc-spirit">
+        <div class="timer-row">
+          <div><div class="timer-ghost">Spirit</div><span class="timer-badge badge-good">No hunt → confirmed Spirit</span></div>
+          <div class="timer-val" id="t-spirit">3:00</div>
+        </div>
+        <div class="timer-bar"><div class="timer-fill" id="b-spirit"></div></div>
+      </div>
+      <div class="timer-card" id="tc-others">
+        <div class="timer-row">
+          <div><div class="timer-ghost">All Others</div><span class="timer-badge badge-neutral">Standard rehunt window</span></div>
+          <div class="timer-val" id="t-others">1:30</div>
+        </div>
+        <div class="timer-bar"><div class="timer-fill" id="b-others"></div></div>
+      </div>
+      <div class="timer-card" id="tc-demon">
+        <div class="timer-row">
+          <div><div class="timer-ghost">Demon</div><span class="timer-badge badge-danger">Hunt before this = Demon!</span></div>
+          <div class="timer-val" id="t-demon">1:00</div>
+        </div>
+        <div class="timer-bar"><div class="timer-fill" id="b-demon"></div></div>
+      </div>
+      <button class="big-btn" id="smudgeBtn" onclick="startSmudge(this,event)">Start smudge timer</button>
+      <button class="small-btn" onclick="resetSmudge()">&#8635; &nbsp; Reset</button>
+      <div class="divider-line"></div>
+      <div class="section-label">Hunt just ended <span class="sl-tag">cooldown</span></div>
+      <div class="timer-card" id="tc-cd-demon">
+        <div class="timer-row">
+          <div><div class="timer-ghost">Demon</div><span class="timer-badge badge-danger">Shortest cooldown in game</span></div>
+          <div class="timer-val" id="cd-demon">0:20</div>
+        </div>
+        <div class="timer-bar"><div class="timer-fill" id="bcd-demon"></div></div>
+      </div>
+      <div class="timer-card" id="tc-cd-others">
+        <div class="timer-row">
+          <div><div class="timer-ghost">All Others</div><span class="timer-badge badge-neutral">Standard cooldown</span></div>
+          <div class="timer-val" id="cd-others">0:25</div>
+        </div>
+        <div class="timer-bar"><div class="timer-fill" id="bcd-others"></div></div>
+      </div>
+      <button class="big-btn" id="cdBtn" onclick="startCooldown(this,event)">Hunt just ended</button>
+      <button class="small-btn" onclick="resetCooldown()">&#8635; &nbsp; Reset cooldown</button>
+    </div>
+
+    <!-- ── GHOST TESTS ── -->
+    <div class="view" id="view-tests">
+      <input class="ghost-search" type="text"
+             placeholder="Search ghost tests..."
+             oninput="filterTests(this.value)"/>
+      <div class="section-label">Tap a card to reveal full test details <span class="sl-tag">flip</span></div>
+      <div id="testCards"></div>
+    </div>
+
+    <!-- ── SANITY ── -->
+    <div class="view" id="view-sanity">
+      <div class="section-label">Your current sanity <span class="sl-tag">drag slider</span></div>
+
+      <!-- Slider -->
+      <div class="sanity-slider-wrap">
+        <!-- Health bar — fills/drains in real time with slider -->
+        <div class="sanity-bar-track">
+          <div class="sanity-bar-fill" id="sanityBarFill"></div>
+        </div>
+        <div class="sanity-slider-labels">
+          <span>0%</span><span>50%</span><span>100%</span>
+        </div>
+        <input type="range" id="sanitySlider" min="0" max="100" value="100"
+               oninput="updateSanitySlider(this.value)"/>
+        <div class="sanity-slider-val">
+          <span id="sanityValDisplay">100%</span>
+          <span class="sanity-val-label">average team sanity</span>
+        </div>
+      </div>
+
+      <!-- Threat summary -->
+      <div class="sanity-summary" id="sanitySummary"></div>
+
+      <!-- Ghost list -->
+      <div class="section-label" style="margin-top:14px">All ghosts — hunt thresholds <span class="sl-tag">tap to expand</span></div>
+      <div id="sanityCards"></div>
+    </div>
+
+    <!-- ── GHOSTS ── -->
+    <div class="view" id="view-ghosts">
+      <input class="ghost-search" type="text"
+             placeholder="Search all 29 ghosts..."
+             oninput="filterGhosts(this.value)"/>
+      <div id="ghostCards"></div>
+    </div>
+
+  </div><!-- /#app-content -->
+
+  <!-- Bottom navigation bar -->
+  <nav class="bottom-nav" aria-label="Main navigation">
+    <div class="nav-item active" id="ni-hunt"   onclick="switchTab('hunt')"   role="button">
+      <i class="ti ti-bolt"  aria-hidden="true"></i>
+      <span class="nav-label">Hunt</span>
+      <div class="nav-dot"></div>
+    </div>
+    <div class="nav-item" id="ni-smudge" onclick="switchTab('smudge')" role="button">
+      <i class="ti ti-clock" aria-hidden="true"></i>
+      <span class="nav-label">Smudge</span>
+      <div class="nav-dot"></div>
+    </div>
+    <div class="nav-item" id="ni-tests"  onclick="switchTab('tests')"  role="button">
+      <i class="ti ti-flask" aria-hidden="true"></i>
+      <span class="nav-label">Tests</span>
+      <div class="nav-dot"></div>
+    </div>
+    <div class="nav-item" id="ni-sanity" onclick="switchTab('sanity')" role="button">
+      <i class="ti ti-brain" aria-hidden="true"></i>
+      <span class="nav-label">Sanity</span>
+      <div class="nav-dot"></div>
+    </div>
+    <div class="nav-item" id="ni-ghosts" onclick="switchTab('ghosts')" role="button">
+      <i class="ti ti-ghost" aria-hidden="true"></i>
+      <span class="nav-label">Ghosts</span>
+      <div class="nav-dot"></div>
+    </div>
+  </nav>
+
+</div><!-- /#app -->
+
+<!--
+  NO defer here — we need guaranteed sequential execution:
+  1. data.js runs first  → GHOSTS, GHOST_TESTS, SANITY_GHOSTS all defined
+  2. app.js runs second → can safely reference all data arrays
+  Using defer caused a race condition on mobile Safari where app.js
+  ran before data.js finished, leaving dynamic tabs (Ghosts, Tests,
+  Sanity) completely blank.
+-->
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
