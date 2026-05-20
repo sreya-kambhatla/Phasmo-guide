@@ -5,6 +5,10 @@
 
 ---
 
+## Link to Application: https://sreya-kambhatla.github.io/Phasmo-guide/
+
+---
+
 ## 🕯 What is this?
 
 Phasmo Guide is a mobile-first companion app for **Phasmophobia** — a co-op horror investigation game where you identify ghosts using evidence and observation. This app is built specifically for **no-evidence runs**, where you have to identify the ghost purely by watching how it behaves.
