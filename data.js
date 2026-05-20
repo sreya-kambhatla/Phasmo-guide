@@ -29,7 +29,7 @@ const GHOSTS = [
   { name:"Dayan",       ev:"EMF5 / Orbs / Spirit Box",          speed:"1.2\u20132.25",   tags:["fast","slow","changes"],           action:"still", actionTxt:"STAND STILL \u2014 reacts to your movement", tell:"Ghost is always female. Walking near it within 10m makes it speed up." },
   { name:"Obambo",      ev:"Writing / UV / D.O.T.S",           speed:"1.45\u20131.96",  tags:["fast","slow","changes"],           action:"hide",  actionTxt:"HIDE \u2014 speed and sanity threshold flip every 2 min", tell:"Calm phase (slow, hunts at 10%) vs Aggressive (fast, hunts at 65%) on 2-min cycle." },
   { name:"Gallu",       ev:"EMF5 / UV / Spirit Box",            speed:"1.36\u20131.96",  tags:["fast","slow","changes"],           action:"run",   actionTxt:"RUN \u2014 3rd salt pile enrages it",    tell:"3-state cycle: Normal \u2192 Enraged (hits salt) \u2192 Weakened (smudge/crucifix). Track state." },
-  { name:"Aswang",      ev:"D.O.T.S / Freezing / Writing",     speed:"1.53\u20132.53",  tags:["normal","losfast"],                action:"hide",  actionTxt:"HIDE in closet \u2014 hunt ends if it reaches you inside", tell:"Reaches LOS top speed faster (17s vs 26s). Ghost is always male." },
+  { name:"Aswang",      ev:"D.O.T.S / Freezing / Writing",     speed:"1.53\u20132.53",  tags:["normal","losfast"],                action:"hide",  actionTxt:"HIDE in closet \u2014 hunt ends if it reaches you inside", tell:"Reaches LOS top speed faster (17s vs 26s)." },
   { name:"Kormos",      ev:"Orbs / Spirit Box / UV",            speed:"Fast/stops",  tags:["fast","ignores"],                  action:"still", actionTxt:"FREEZE \u2014 completely blind, tracks sound only", tell:"Stand completely still and silent. It walks right past you. No electronics." },
 ];
 
