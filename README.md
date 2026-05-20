@@ -5,7 +5,7 @@
 
 ---
 
-## Link to Application: https://sreya-kambhatla.github.io/Phasmo-guide/
+### Link to Application: https://sreya-kambhatla.github.io/Phasmo-guide/
 
 ---
 
